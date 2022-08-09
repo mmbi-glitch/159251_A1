@@ -69,7 +69,7 @@
                         <!-- Default configuration for running with: mvn clean javafx:run -->
                         <id>default-cli</id>
                         <configuration>
-                            <mainClass>com.c159251.a1.jtexteditor/com.c159251.a1.jtexteditor.HelloApplication
+                            <mainClass>com.c159251.a1.jtexteditor/com.c159251.a1.jtexteditor.EditorLauncher
                             </mainClass>
                             <launcher>app</launcher>
                             <jlinkZipName>app</jlinkZipName>

@@ -1,0 +1,9 @@
+
+U
+java:S1128":Remove this unused import 'javafx.scene.control.MenuItem'.(¶—øäûÿÿÿÿ
+K
+java:S1128"0Remove this unused import 'java.io.IOException'.(ªº»Úıÿÿÿÿ
+V
+java:S1068"4Remove this unused "layoutController" private field.(ŒÑÈõıÿÿÿÿ8Ù°š¨0
+F
+java:S1068"+Remove this unused "txtFile" private field.(µ©¤øÿÿÿÿ

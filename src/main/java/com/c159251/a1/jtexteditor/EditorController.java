@@ -3,14 +3,12 @@ package com.c159251.a1.jtexteditor;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextArea;
 import javafx.stage.FileChooser;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Stream;
@@ -19,8 +17,12 @@ import java.util.stream.Stream;
 
 public class EditorController {
 
+    public static File selectedFile;
+
     public MenuItem closeFile;
     public MenuItem openFile;
+    public MenuItem saveFile;
+    public MenuItem saveFileAs;
     public TextArea textPane;
 
     // close file on 'close' button press
@@ -37,7 +39,7 @@ public class EditorController {
                 new FileChooser.ExtensionFilter("Text files (*.txt)", "*.txt")
         );
         fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
-        File selectedFile = fileChooser.showOpenDialog(null);
+        selectedFile = fileChooser.showOpenDialog(null);
         if (selectedFile != null) {
             loadTextFromFile(selectedFile);
         }
@@ -63,4 +65,51 @@ public class EditorController {
         }
 
     }
+
+    @FXML
+    public void onFileSave() {
+        //if save is triggered with no stored file then it should try as a 'save as'
+        if (selectedFile == null) {
+            onFileSaveAs();
+            return;
+        }
+        saveTextToFile(selectedFile);
+
+    }
+
+    @FXML void onFileSaveAs() {
+
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("Text files (*.txt)", "*.txt")
+        );
+        //should adjust this so it defaults to the selectedFile directory unless == null
+        fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
+        selectedFile = fileChooser.showSaveDialog(null);
+        if (selectedFile != null) {
+            //if file does not exist then it does it for us, no worries.
+            saveTextToFile(selectedFile);
+        }
+    }
+
+    public void saveTextToFile(File fileToSave) {
+
+
+        //if the text is not blank then
+        if (!textPane.getText().isEmpty()) {
+            try {
+
+                FileWriter fileWriter = new FileWriter(selectedFile);
+                fileWriter.write(textPane.getText());
+                fileWriter.close();
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        }
+
+    }
+
+
 }

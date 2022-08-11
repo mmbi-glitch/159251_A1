@@ -18,6 +18,8 @@ import java.util.stream.Stream;
 public class EditorController {
 
     public static File selectedFile;
+    // using a different var for saving file (using the same var can cause errors)
+    public static File savedFile;
 
     public MenuItem closeFile;
     public MenuItem openFile;
@@ -69,47 +71,40 @@ public class EditorController {
     @FXML
     public void onFileSave() {
         //if save is triggered with no stored file then it should try as a 'save as'
-        if (selectedFile == null) {
+        if (savedFile == null) {
             onFileSaveAs();
             return;
         }
-        saveTextToFile(selectedFile);
-
+        saveTextToFile(savedFile);
     }
 
     @FXML void onFileSaveAs() {
-
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().add(
                 new FileChooser.ExtensionFilter("Text files (*.txt)", "*.txt")
         );
         //should adjust this so it defaults to the selectedFile directory unless == null
         fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
-        selectedFile = fileChooser.showSaveDialog(null);
-        if (selectedFile != null) {
+        if (savedFile != null) {
+            fileChooser.setInitialDirectory(savedFile.getParentFile());
+        }
+        savedFile = fileChooser.showSaveDialog(null);
+        if (savedFile != null) {
             //if file does not exist then it does it for us, no worries.
-            saveTextToFile(selectedFile);
+            saveTextToFile(savedFile);
         }
     }
 
     public void saveTextToFile(File fileToSave) {
-
-
         //if the text is not blank then
         if (!textPane.getText().isEmpty()) {
-            try {
-
-                FileWriter fileWriter = new FileWriter(selectedFile);
+            try (BufferedWriter fileWriter = new BufferedWriter(new FileWriter(savedFile))) {
                 fileWriter.write(textPane.getText());
                 fileWriter.close();
 
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
         }
-
     }
-
-
 }

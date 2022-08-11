@@ -16,6 +16,8 @@ public class EditorLauncher extends Application {
     public void start(Stage primaryStage) throws Exception {
         FXMLLoader fxmlLoader = new FXMLLoader(EditorLauncher.class.getResource("jtexteditor-layout.fxml"));
         Parent root = fxmlLoader.load();
+        EditorController editorController = fxmlLoader.getController();
+        editorController.initialize();
         Scene primaryScene = new Scene(root, 720, 480);
         primaryStage.setTitle("Simple Text Editor");
         primaryStage.setScene(primaryScene);

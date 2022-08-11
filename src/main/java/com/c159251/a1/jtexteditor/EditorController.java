@@ -58,7 +58,7 @@ public class EditorController {
             if (!fileToText.isEmpty()) {
                 textPane.setText(fileToText.toString());
             }
-            fileReader.close();
+
         }
         catch (IOException e) {
             throw new RuntimeException(e);
@@ -99,7 +99,6 @@ public class EditorController {
         if (!textPane.getText().isEmpty()) {
             try (BufferedWriter fileWriter = new BufferedWriter(new FileWriter(selectedFile))) {
                 fileWriter.write(textPane.getText());
-                fileWriter.close();
 
             } catch (IOException e) {
                 e.printStackTrace();

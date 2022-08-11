@@ -1,29 +1,23 @@
 package com.c159251.a1.jtexteditor;
 
-import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextArea;
-import javafx.scene.input.MouseEvent;
 import javafx.stage.FileChooser;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.util.concurrent.ExecutionException;
-import java.util.stream.Stream;
+import java.io.*;
 
 /** This class is connected with the fxml config file and is responsible for the main program logic. **/
 
 public class EditorController {
 
+    public static File selectedFile;
     public MenuItem closeFile;
     public MenuItem openFile;
+    public MenuItem saveFile;
+    public MenuItem saveFileAs;
     public TextArea textPane;
     public Button cutBtn;
     public Button copyBtn;
@@ -53,13 +47,13 @@ public class EditorController {
                 new FileChooser.ExtensionFilter("Text files (*.odt, *.txt)", "*.txt", "*.odt")
         );
         fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
-        File selectedFile = fileChooser.showOpenDialog(null);
+        selectedFile = fileChooser.showOpenDialog(null);
         if (selectedFile != null) {
             loadTextFromFile(selectedFile);
         }
     }
 
-    public void loadTextFromFile(File fileToLoad) {
+    protected void loadTextFromFile(File fileToLoad) {
         StringBuilder fileToText;
         // load text in file using a buffered file reader
         try (BufferedReader fileReader = new BufferedReader(new FileReader(fileToLoad))) {
@@ -73,6 +67,7 @@ public class EditorController {
             if (!fileToText.isEmpty()) {
                 textPane.setText(fileToText.toString());
             }
+
         }
         catch (IOException e) {
             e.printStackTrace();
@@ -114,6 +109,45 @@ public class EditorController {
         if (!cutText.isBlank()) {
             textPane.insertText(textPane.getCaretPosition(), cutText);
             System.out.println("inserted cut text");
+        }
+    }
+    @FXML
+    protected void onFileSave() {
+        //if save is triggered with no stored file, then it should try as a 'save as'
+        if (selectedFile == null) {
+            onFileSaveAs();
+            return;
+        }
+        saveTextToFile(selectedFile);
+    }
+
+    @FXML
+    protected void onFileSaveAs() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("Text files (*.txt)", "*.txt")
+        );
+        // if saved file is null, set to default directory
+        fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
+        // otherwise, set to parent directory of saved file
+        if (selectedFile != null) {
+            fileChooser.setInitialDirectory(selectedFile.getParentFile());
+        }
+        selectedFile = fileChooser.showSaveDialog(null);
+        if (selectedFile != null) {
+            saveTextToFile(selectedFile);
+        }
+    }
+
+    public void saveTextToFile(File fileToSave) {
+        //if the text is not blank, then write text to file
+        if (!textPane.getText().isBlank()) {
+            try (BufferedWriter fileWriter = new BufferedWriter(new FileWriter(fileToSave))) {
+                fileWriter.write(textPane.getText());
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 }

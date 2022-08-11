@@ -66,7 +66,6 @@
             </ButtonBar>
          </children>
       </VBox>
-=======
       <MenuBar BorderPane.alignment="CENTER">
         <menus>
           <Menu mnemonicParsing="false" text="File">
@@ -90,7 +89,6 @@
           </Menu>
         </menus>
       </MenuBar>
->>>>>>> feature-save_saveas
    </top>
    <center>
       <ScrollPane fitToHeight="true" fitToWidth="true" BorderPane.alignment="CENTER">

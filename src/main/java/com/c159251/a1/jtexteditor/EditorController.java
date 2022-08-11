@@ -17,12 +17,12 @@ import java.util.stream.Stream;
 
 public class EditorController {
 
-    private static File selectedFile;
-    private MenuItem closeFile;
-    private MenuItem openFile;
-    private MenuItem saveFile;
-    private MenuItem saveFileAs;
-    private TextArea textPane;
+    public static File selectedFile;
+    public MenuItem closeFile;
+    public MenuItem openFile;
+    public MenuItem saveFile;
+    public MenuItem saveFileAs;
+    public TextArea textPane;
 
     // close file on 'close' button press
     @FXML
@@ -58,6 +58,7 @@ public class EditorController {
             if (!fileToText.isEmpty()) {
                 textPane.setText(fileToText.toString());
             }
+            fileReader.close();
         }
         catch (IOException e) {
             throw new RuntimeException(e);

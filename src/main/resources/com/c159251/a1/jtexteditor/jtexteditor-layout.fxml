@@ -58,7 +58,10 @@
                         <FontIcon iconLiteral="typ-scissors" iconSize="20" />
                      </graphic>
                   </Button>
-                  <Button fx:id="selectBtn" mnemonicParsing="false" onAction="#selectText" text="Select" />
+                  <Button fx:id="selectBtn" mnemonicParsing="false" onAction="#selectText" text="Select">
+                     <graphic>
+                        <FontIcon iconLiteral="typ-input-checked" iconSize="20" />
+                     </graphic></Button>
                </buttons>
             </ButtonBar>
          </children>

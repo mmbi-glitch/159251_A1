@@ -17,15 +17,15 @@ import java.util.stream.Stream;
 
 public class EditorController {
 
-    public static File selectedFile;
+    private static File selectedFile;
     // using a different var for saving file (using the same var can cause errors)
-    public static File savedFile;
+    private static File savedFile;
 
-    public MenuItem closeFile;
-    public MenuItem openFile;
-    public MenuItem saveFile;
-    public MenuItem saveFileAs;
-    public TextArea textPane;
+    private MenuItem closeFile;
+    private MenuItem openFile;
+    private MenuItem saveFile;
+    private MenuItem saveFileAs;
+    private TextArea textPane;
 
     // close file on 'close' button press
     @FXML
@@ -35,7 +35,7 @@ public class EditorController {
 
     // open txt file on 'open' button press
     @FXML
-    public void onFileOpen(ActionEvent ae) {
+    protected void onFileOpen(ActionEvent ae) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().add(
                 new FileChooser.ExtensionFilter("Text files (*.txt)", "*.txt")
@@ -45,9 +45,13 @@ public class EditorController {
         if (selectedFile != null) {
             loadTextFromFile(selectedFile);
         }
+        // reset currently saved file if opening a new file
+        if (savedFile != null && savedFile != selectedFile) {
+            savedFile = null;
+        }
     }
 
-    public void loadTextFromFile(File fileToLoad) {
+    protected void loadTextFromFile(File fileToLoad) {
         StringBuilder fileToText;
         // load text in file using a buffered file reader
         try (BufferedReader fileReader = new BufferedReader(new FileReader(fileToLoad))) {
@@ -69,8 +73,8 @@ public class EditorController {
     }
 
     @FXML
-    public void onFileSave() {
-        //if save is triggered with no stored file then it should try as a 'save as'
+    protected void onFileSave() {
+        //if save is triggered with no stored file, then it should try as a 'save as'
         if (savedFile == null) {
             onFileSaveAs();
             return;
@@ -78,24 +82,25 @@ public class EditorController {
         saveTextToFile(savedFile);
     }
 
-    @FXML void onFileSaveAs() {
+    @FXML
+    protected void onFileSaveAs() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().add(
                 new FileChooser.ExtensionFilter("Text files (*.txt)", "*.txt")
         );
-        //should adjust this so it defaults to the selectedFile directory unless == null
+        // if saved file is null, set to default directory
         fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
+        // otherwise, set to parent directory of saved file
         if (savedFile != null) {
             fileChooser.setInitialDirectory(savedFile.getParentFile());
         }
         savedFile = fileChooser.showSaveDialog(null);
         if (savedFile != null) {
-            //if file does not exist then it does it for us, no worries.
             saveTextToFile(savedFile);
         }
     }
 
-    public void saveTextToFile(File fileToSave) {
+    protected void saveTextToFile(File fileToSave) {
         //if the text is not blank then
         if (!textPane.getText().isEmpty()) {
             try (BufferedWriter fileWriter = new BufferedWriter(new FileWriter(savedFile))) {

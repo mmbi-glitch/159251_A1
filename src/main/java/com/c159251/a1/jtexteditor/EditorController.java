@@ -18,9 +18,6 @@ import java.util.stream.Stream;
 public class EditorController {
 
     private static File selectedFile;
-    // using a different var for saving file (using the same var can cause errors)
-    private static File savedFile;
-
     private MenuItem closeFile;
     private MenuItem openFile;
     private MenuItem saveFile;
@@ -44,10 +41,6 @@ public class EditorController {
         selectedFile = fileChooser.showOpenDialog(null);
         if (selectedFile != null) {
             loadTextFromFile(selectedFile);
-        }
-        // reset currently saved file if opening a new file
-        if (savedFile != null && savedFile != selectedFile) {
-            savedFile = null;
         }
     }
 
@@ -75,11 +68,11 @@ public class EditorController {
     @FXML
     protected void onFileSave() {
         //if save is triggered with no stored file, then it should try as a 'save as'
-        if (savedFile == null) {
+        if (selectedFile == null) {
             onFileSaveAs();
             return;
         }
-        saveTextToFile(savedFile);
+        saveTextToFile(selectedFile);
     }
 
     @FXML
@@ -91,19 +84,19 @@ public class EditorController {
         // if saved file is null, set to default directory
         fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
         // otherwise, set to parent directory of saved file
-        if (savedFile != null) {
-            fileChooser.setInitialDirectory(savedFile.getParentFile());
+        if (selectedFile != null) {
+            fileChooser.setInitialDirectory(selectedFile.getParentFile());
         }
-        savedFile = fileChooser.showSaveDialog(null);
-        if (savedFile != null) {
-            saveTextToFile(savedFile);
+        selectedFile = fileChooser.showSaveDialog(null);
+        if (selectedFile != null) {
+            saveTextToFile(selectedFile);
         }
     }
 
     protected void saveTextToFile(File fileToSave) {
         //if the text is not blank then
         if (!textPane.getText().isEmpty()) {
-            try (BufferedWriter fileWriter = new BufferedWriter(new FileWriter(savedFile))) {
+            try (BufferedWriter fileWriter = new BufferedWriter(new FileWriter(selectedFile))) {
                 fileWriter.write(textPane.getText());
                 fileWriter.close();
 

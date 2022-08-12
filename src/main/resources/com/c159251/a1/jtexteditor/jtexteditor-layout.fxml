@@ -23,6 +23,9 @@
                            </Menu>
                            <Menu mnemonicParsing="false" text="Edit">
                                <items>
+                              <MenuItem fx:id="menuCut" mnemonicParsing="false" onAction="#cutText" text="Cut" />
+                              <MenuItem fx:id="menuCopy" mnemonicParsing="false" onAction="#copyText" text="Copy" />
+                              <MenuItem fx:id="menuPaste" mnemonicParsing="false" onAction="#pasteText" text="Paste" />
                                    <MenuItem mnemonicParsing="false" text="Delete" />
                                </items>
                            </Menu>

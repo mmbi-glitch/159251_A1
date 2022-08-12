@@ -8,6 +8,7 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextArea;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
+import javafx.scene.layout.AnchorPane;
 import javafx.stage.FileChooser;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -34,13 +35,16 @@ public class EditorController {
     public String copiedText;
     public String cutText;
     public Label dateTimeLabel;
+    public AnchorPane topAnchor;
 
     @FXML
     public void initialize() {
         systemClipboard = Clipboard.getSystemClipboard();
         //set date and time in menu
         SimpleDateFormat formatter = new SimpleDateFormat("dd MMM yyyy HH:mm");
+        AnchorPane.setRightAnchor(dateTimeLabel,5.0);
         dateTimeLabel.setText(formatter.format(new Date()));
+
     }
 
     // close file on 'close' button press

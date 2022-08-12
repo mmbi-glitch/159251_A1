@@ -8,7 +8,7 @@
    <top>
       <VBox>
          <children>
-            <AnchorPane styleClass="menu-bar" BorderPane.alignment="CENTER">
+            <AnchorPane fx:id="topAnchor" styleClass="menu-bar" BorderPane.alignment="CENTER">
                <children>
                    <MenuBar>
                        <menus>

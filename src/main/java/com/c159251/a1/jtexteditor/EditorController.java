@@ -3,11 +3,14 @@ package com.c159251.a1.jtexteditor;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextArea;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.stage.FileChooser;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import java.io.*;
 
@@ -30,9 +33,14 @@ public class EditorController {
     public int selectTo;
     public String copiedText;
     public String cutText;
+    public Label dateTimeLabel;
 
+    @FXML
     public void initialize() {
         systemClipboard = Clipboard.getSystemClipboard();
+        //set date and time in menu
+        SimpleDateFormat formatter = new SimpleDateFormat("dd MMM yyyy HH:mm");
+        dateTimeLabel.setText(formatter.format(new Date()));
     }
 
     // close file on 'close' button press

@@ -10,6 +10,16 @@ import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.FileChooser;
+import org.odftoolkit.odfdom.doc.OdfTextDocument;
+import org.odftoolkit.odfdom.dom.element.office.OfficeTextElement;
+import org.odftoolkit.odfdom.dom.element.text.TextLineBreakElement;
+import org.odftoolkit.odfdom.incubator.doc.text.OdfEditableTextExtractor;
+import org.odftoolkit.odfdom.incubator.doc.text.OdfTextExtractor;
+import org.odftoolkit.odfdom.incubator.doc.text.OdfTextParagraph;
+import org.odftoolkit.odfdom.pkg.OdfElement;
+import org.odftoolkit.odfdom.pkg.OdfPackage;
+import org.w3c.dom.Node;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -57,15 +67,45 @@ public class EditorController {
     @FXML
     public void onFileOpen(ActionEvent actionEvent) {
         FileChooser fileChooser = new FileChooser();
-        fileChooser.getExtensionFilters().add(
-                new FileChooser.ExtensionFilter("Text files (*.odt, *.txt)", "*.txt", "*.odt")
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Plain Text (*.txt)", "*.txt"),
+                new FileChooser.ExtensionFilter("OpenDocument Text (*.odt)", "*.odt")
         );
         fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
         selectedFile = fileChooser.showOpenDialog(null);
         if (selectedFile != null) {
+            if (selectedFile.getName().contains(".odt")) {
+                System.out.println("This is an odt file");
+                loadTextFromOdtFile(selectedFile);
+                return;
+            }
             loadTextFromFile(selectedFile);
         }
     }
+
+    protected void loadTextFromOdtFile(File fileToLoad) {
+        try {
+            OdfTextDocument document = OdfTextDocument.loadDocument(fileToLoad);
+            OfficeTextElement root = document.getContentRoot();
+            StringBuilder fileToText = new StringBuilder();
+            OdfElement element = root.getFirstChildElement();
+            OdfTextExtractor extractor;
+            while (element != null) {
+                extractor = OdfTextExtractor.newOdfTextExtractor(element);
+                fileToText.append(extractor.getText() + "\n");
+                root.removeChild(element);
+                element = root.getFirstChildElement();
+            }
+            System.out.println(fileToText.toString());
+            System.out.println(fileToText);
+            if (!fileToText.isEmpty()) {
+                textPane.setText(fileToText.toString());
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 
     protected void loadTextFromFile(File fileToLoad) {
         StringBuilder fileToText;
@@ -128,10 +168,10 @@ public class EditorController {
     @FXML
     protected void onFileSaveAs() {
         FileChooser fileChooser = new FileChooser();
-        fileChooser.getExtensionFilters().add(
-                new FileChooser.ExtensionFilter("Text files (*.txt)", "*.txt")
-        );
-        // if saved file is null, set to default directory
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Plain Text (*.txt)", "*.txt"),
+                new FileChooser.ExtensionFilter("OpenDocument Text (*.odt)", "*.odt")
+        );        // if saved file is null, set to default directory
         fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
         // otherwise, set to parent directory of saved file
         if (selectedFile != null) {
@@ -144,6 +184,29 @@ public class EditorController {
     }
 
     public void saveTextToFile(File fileToSave) {
+        // check if file is an ODT file first
+        if (fileToSave.getName().contains(".odt") && !textPane.getText().isBlank()) {
+            System.out.println("This is an odt file");
+            try {
+                OdfTextDocument document = OdfTextDocument.newTextDocument();
+                OfficeTextElement officeText = document.getContentRoot();
+                Node childNode = officeText.getLastChild();
+                OdfTextParagraph paragraph;
+                if (OdfTextParagraph.class.isInstance(childNode)) {
+                    paragraph = (OdfTextParagraph) childNode;
+                }
+                else {
+                    paragraph = new OdfTextParagraph(document.getContentDom());
+                }
+                System.out.println(childNode.getNodeName());
+                paragraph.addContentWhitespace(textPane.getText());
+                document.save(fileToSave);
+                document.close();
+                return;
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
         //if the text is not blank, then write text to file
         if (!textPane.getText().isBlank()) {
             try (BufferedWriter fileWriter = new BufferedWriter(new FileWriter(fileToSave))) {

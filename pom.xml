@@ -52,6 +52,12 @@
             <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.odftoolkit/odfdom-java -->
+        <dependency>
+            <groupId>org.odftoolkit</groupId>
+            <artifactId>odfdom-java</artifactId>
+            <version>0.10.0</version>
+        </dependency>
     </dependencies>
 
     <build>

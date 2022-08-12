@@ -5,6 +5,8 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextArea;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
 import javafx.stage.FileChooser;
 
 import java.io.*;
@@ -14,6 +16,7 @@ import java.io.*;
 public class EditorController {
 
     public static File selectedFile;
+    public static Clipboard systemClipboard;
     public MenuItem closeFile;
     public MenuItem openFile;
     public MenuItem saveFile;
@@ -29,8 +32,7 @@ public class EditorController {
     public String cutText;
 
     public void initialize() {
-        copiedText = "";
-        cutText = "";
+        systemClipboard = Clipboard.getSystemClipboard();
     }
 
     // close file on 'close' button press
@@ -75,40 +77,30 @@ public class EditorController {
 
     }
 
-    // select text method
-    public void selectText() {
-        selectFrom = textPane.getCaretPosition() - textPane.getSelectedText().length();
-        selectTo = textPane.getCaretPosition();
-        System.out.println("selected text = " + textPane.getText(selectFrom, selectTo));
-        System.out.println("length of selected text = " + textPane.getSelectedText().length());
-        System.out.println("pos = " + selectFrom + " " + selectTo);
-    }
-
     public void copyText() {
-        copiedText = textPane.getText(selectFrom, selectTo);
-        if (!cutText.isBlank()) {
-            cutText = "";
-        }
-        System.out.println("copied text = " + copiedText);
+        ClipboardContent content = new ClipboardContent();
+        content.putString(textPane.getSelectedText());
+        systemClipboard.setContent(content);
+        System.out.println("copied text = " + systemClipboard.getString());
     }
 
     public void cutText() {
-        cutText = textPane.getText(selectFrom, selectTo);
+        ClipboardContent content = new ClipboardContent();
+        String text = textPane.getSelectedText();
+        selectFrom = textPane.getCaretPosition() - text.length();
+        selectTo = textPane.getCaretPosition();
+        System.out.println("selectFrom b4 = " + selectFrom);
+        System.out.println("selectTo b4 = " + selectTo);
         textPane.deleteText(selectFrom, selectTo);
-        if (!copiedText.isBlank()) {
-            copiedText = "";
-        }
-        System.out.println("cut text = " + cutText);
+        content.putString(text);
+        systemClipboard.setContent(content);
+        System.out.println("cut text = " + systemClipboard.getString());
     }
 
     public void pasteText() {
-        if (!copiedText.isBlank()) {
-            textPane.insertText(textPane.getCaretPosition(), copiedText);
-            System.out.println("inserted copied text");
-        }
-        if (!cutText.isBlank()) {
-            textPane.insertText(textPane.getCaretPosition(), cutText);
-            System.out.println("inserted cut text");
+        if (!systemClipboard.getString().isBlank()) {
+            textPane.insertText(textPane.getCaretPosition(), systemClipboard.getString());
+            System.out.println("pasted text");
         }
     }
     @FXML

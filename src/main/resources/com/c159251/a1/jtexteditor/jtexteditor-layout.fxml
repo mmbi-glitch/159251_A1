@@ -15,32 +15,29 @@
    <top>
       <VBox>
          <children>
-            <MenuBar>
-              <menus>
-                <Menu mnemonicParsing="false" text="File">
-                  <items>
-                        <MenuItem fx:id="openFile" mnemonicParsing="false" onAction="#onFileOpen" text="Open" />
-                        <MenuItem mnemonicParsing="false" text="Save" />
-                        <MenuItem mnemonicParsing="false" text="Save As" />
-                        <MenuItem mnemonicParsing="false" text="Export" />
-                    <MenuItem fx:id="closeFile" mnemonicParsing="false" onAction="#onFileClose" text="Close" />
-                  </items>
-                </Menu>
-                <Menu mnemonicParsing="false" text="Edit">
-                  <items>
-                    <MenuItem mnemonicParsing="false" onAction="#selectText" text="Select" />
-                        <MenuItem mnemonicParsing="false" onAction="#cutText" text="Cut" />
-                        <MenuItem mnemonicParsing="false" onAction="#copyText" text="Copy" />
-                        <MenuItem mnemonicParsing="false" onAction="#pasteText" text="Paste" />
-                  </items>
-                </Menu>
-                <Menu mnemonicParsing="false" text="Help">
-                  <items>
-                    <MenuItem mnemonicParsing="false" text="About" />
-                  </items>
-                </Menu>
-              </menus>
-            </MenuBar>
+             <MenuBar BorderPane.alignment="CENTER">
+                 <menus>
+                     <Menu mnemonicParsing="false" text="File">
+                         <items>
+                             <MenuItem fx:id="openFile" mnemonicParsing="false" onAction="#onFileOpen" text="Open" />
+                             <MenuItem fx:id = "saveFile" mnemonicParsing="false" onAction="#onFileSave" text="Save" />
+                             <MenuItem fx:id = "saveFileAs" mnemonicParsing="false" onAction="#onFileSaveAs" text="Save As" />
+                             <MenuItem mnemonicParsing="false" text="Export" />
+                             <MenuItem fx:id="closeFile" mnemonicParsing="false" onAction="#onFileClose" text="Close" />
+                         </items>
+                     </Menu>
+                     <Menu mnemonicParsing="false" text="Edit">
+                         <items>
+                             <MenuItem mnemonicParsing="false" text="Delete" />
+                         </items>
+                     </Menu>
+                     <Menu mnemonicParsing="false" text="Help">
+                         <items>
+                             <MenuItem mnemonicParsing="false" text="About" />
+                         </items>
+                     </Menu>
+                 </menus>
+             </MenuBar>
             <ButtonBar nodeOrientation="RIGHT_TO_LEFT">
                <buttons>
                   <Button fx:id="pasteBtn" mnemonicParsing="false" onAction="#pasteText" text="Paste">
@@ -58,7 +55,7 @@
                         <FontIcon iconLiteral="typ-scissors" iconSize="20" />
                      </graphic>
                   </Button>
-                  <Button fx:id="selectBtn" mnemonicParsing="false" onAction="#selectText" text="Select">
+                  <Button fx:id="selectBtn" mnemonicParsing="false" text="Select">
                      <graphic>
                         <FontIcon iconLiteral="typ-input-checked" iconSize="20" />
                      </graphic></Button>
@@ -66,29 +63,6 @@
             </ButtonBar>
          </children>
       </VBox>
-      <MenuBar BorderPane.alignment="CENTER">
-        <menus>
-          <Menu mnemonicParsing="false" text="File">
-            <items>
-                <MenuItem fx:id="openFile" mnemonicParsing="false" onAction="#onFileOpen" text="Open" />
-                <MenuItem fx:id = "saveFile" mnemonicParsing="false" onAction="#onFileSave" text="Save" />
-                <MenuItem fx:id = "saveFileAs" mnemonicParsing="false" onAction="#onFileSaveAs" text="Save As" />
-                <MenuItem mnemonicParsing="false" text="Export" />
-                <MenuItem fx:id="closeFile" mnemonicParsing="false" onAction="#onFileClose" text="Close" />
-            </items>
-          </Menu>
-          <Menu mnemonicParsing="false" text="Edit">
-            <items>
-              <MenuItem mnemonicParsing="false" text="Delete" />
-            </items>
-          </Menu>
-          <Menu mnemonicParsing="false" text="Help">
-            <items>
-              <MenuItem mnemonicParsing="false" text="About" />
-            </items>
-          </Menu>
-        </menus>
-      </MenuBar>
    </top>
    <center>
       <ScrollPane fitToHeight="true" fitToWidth="true" BorderPane.alignment="CENTER">

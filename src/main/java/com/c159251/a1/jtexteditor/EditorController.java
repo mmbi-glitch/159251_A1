@@ -1,5 +1,6 @@
 package com.c159251.a1.jtexteditor;
 
+import com.itextpdf.kernel.pdf.canvas.parser.PdfTextExtractor;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -10,15 +11,22 @@ import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.FileChooser;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.common.PDStream;
+import org.apache.pdfbox.pdmodel.font.*;
+import org.apache.pdfbox.text.PDFTextStripper;
+import org.apache.pdfbox.util.Charsets;
 import org.odftoolkit.odfdom.doc.OdfTextDocument;
 import org.odftoolkit.odfdom.dom.element.office.OfficeTextElement;
-import org.odftoolkit.odfdom.dom.element.text.TextLineBreakElement;
-import org.odftoolkit.odfdom.incubator.doc.text.OdfEditableTextExtractor;
 import org.odftoolkit.odfdom.incubator.doc.text.OdfTextExtractor;
 import org.odftoolkit.odfdom.incubator.doc.text.OdfTextParagraph;
 import org.odftoolkit.odfdom.pkg.OdfElement;
-import org.odftoolkit.odfdom.pkg.OdfPackage;
 import org.w3c.dom.Node;
+import com.itextpdf.kernel.pdf.*;
+import com.itextpdf.layout.Document;
+import com.itextpdf.layout.element.Paragraph;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -69,23 +77,38 @@ public class EditorController {
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter("Plain Text (*.txt)", "*.txt"),
-                new FileChooser.ExtensionFilter("OpenDocument Text (*.odt)", "*.odt")
+                new FileChooser.ExtensionFilter("OpenDocument Text (*.odt)", "*.odt"),
+                new FileChooser.ExtensionFilter("PDF (*.pdf)", "*.pdf")
         );
         fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
         selectedFile = fileChooser.showOpenDialog(null);
         if (selectedFile != null) {
             if (selectedFile.getName().contains(".odt")) {
-                System.out.println("This is an odt file");
                 loadTextFromOdtFile(selectedFile);
+                return;
+            }
+            if (selectedFile.getName().contains(".pdf")) {
+                loadTextFromPdfFile(selectedFile);
                 return;
             }
             loadTextFromFile(selectedFile);
         }
     }
 
+    protected void loadTextFromPdfFile(File fileToLoad) {
+        try (PDDocument document = PDDocument.load(fileToLoad)) {
+            PDFTextStripper extractor = new PDFTextStripper();
+            String fileToText = extractor.getText(document);
+            if (!fileToText.isBlank()) {
+                textPane.setText(fileToText);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     protected void loadTextFromOdtFile(File fileToLoad) {
-        try {
-            OdfTextDocument document = OdfTextDocument.loadDocument(fileToLoad);
+        try (OdfTextDocument document = OdfTextDocument.loadDocument(fileToLoad)) {
             OfficeTextElement root = document.getContentRoot();
             StringBuilder fileToText = new StringBuilder();
             OdfElement element = root.getFirstChildElement();
@@ -133,7 +156,6 @@ public class EditorController {
         ClipboardContent content = new ClipboardContent();
         content.putString(textPane.getSelectedText());
         systemClipboard.setContent(content);
-        System.out.println("copied text = " + systemClipboard.getString());
     }
 
     public void cutText() {
@@ -141,18 +163,14 @@ public class EditorController {
         String text = textPane.getSelectedText();
         selectFrom = textPane.getCaretPosition() - text.length();
         selectTo = textPane.getCaretPosition();
-        System.out.println("selectFrom b4 = " + selectFrom);
-        System.out.println("selectTo b4 = " + selectTo);
         textPane.deleteText(selectFrom, selectTo);
         content.putString(text);
         systemClipboard.setContent(content);
-        System.out.println("cut text = " + systemClipboard.getString());
     }
 
     public void pasteText() {
         if (!systemClipboard.getString().isBlank()) {
             textPane.insertText(textPane.getCaretPosition(), systemClipboard.getString());
-            System.out.println("pasted text");
         }
     }
     @FXML
@@ -162,7 +180,11 @@ public class EditorController {
             onFileSaveAs();
             return;
         }
-        saveTextToFile(selectedFile);
+        if (selectedFile.getName().contains(".odt")) {
+            saveTextToOdtFile(selectedFile);
+            return;
+        }
+        saveTextToTxtFile(selectedFile);
     }
 
     @FXML
@@ -170,7 +192,8 @@ public class EditorController {
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter("Plain Text (*.txt)", "*.txt"),
-                new FileChooser.ExtensionFilter("OpenDocument Text (*.odt)", "*.odt")
+                new FileChooser.ExtensionFilter("OpenDocument Text (*.odt)", "*.odt"),
+                new FileChooser.ExtensionFilter("PDF (*.pdf)", "*.pdf")
         );        // if saved file is null, set to default directory
         fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
         // otherwise, set to parent directory of saved file
@@ -179,16 +202,33 @@ public class EditorController {
         }
         selectedFile = fileChooser.showSaveDialog(null);
         if (selectedFile != null) {
-            saveTextToFile(selectedFile);
+            if (selectedFile.getName().contains(".odt")) {
+                saveTextToOdtFile(selectedFile);
+                return;
+            }
+            if (selectedFile.getName().contains(".pdf")) {
+                saveTextToPdfFile(selectedFile);
+                return;
+            }
+            saveTextToTxtFile(selectedFile);
         }
     }
 
-    public void saveTextToFile(File fileToSave) {
-        // check if file is an ODT file first
-        if (fileToSave.getName().contains(".odt") && !textPane.getText().isBlank()) {
-            System.out.println("This is an odt file");
-            try {
-                OdfTextDocument document = OdfTextDocument.newTextDocument();
+    public void saveTextToPdfFile(File fileToSave) {
+        if (!textPane.getText().isBlank()) {
+            try (PdfDocument pdf = new PdfDocument(new PdfWriter(fileToSave))) {
+                Document doc = new Document(pdf);
+                doc.add(new Paragraph(textPane.getText()));
+                doc.close();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    public void saveTextToOdtFile(File fileToSave) {
+        if (!textPane.getText().isBlank()) {
+            try (OdfTextDocument document = OdfTextDocument.newTextDocument()) {
                 OfficeTextElement officeText = document.getContentRoot();
                 Node childNode = officeText.getLastChild();
                 OdfTextParagraph paragraph;
@@ -201,17 +241,17 @@ public class EditorController {
                 System.out.println(childNode.getNodeName());
                 paragraph.addContentWhitespace(textPane.getText());
                 document.save(fileToSave);
-                document.close();
-                return;
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         }
+    }
+
+    public void saveTextToTxtFile(File fileToSave) {
         //if the text is not blank, then write text to file
         if (!textPane.getText().isBlank()) {
             try (BufferedWriter fileWriter = new BufferedWriter(new FileWriter(fileToSave))) {
                 fileWriter.write(textPane.getText());
-
             } catch (IOException e) {
                 e.printStackTrace();
             }

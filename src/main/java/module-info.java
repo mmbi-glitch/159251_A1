@@ -7,6 +7,15 @@ module com.c159251.a1.jtexteditor {
     requires org.kordamp.ikonli.typicons;
     requires odfdom.java;
     requires java.xml;
+    requires org.apache.pdfbox;
+    requires org.slf4j;
+    requires kernel;
+    requires pdfa;
+    requires io;
+    requires barcodes;
+    requires styled.xml.parser;
+    requires layout;
+
     opens com.c159251.a1.jtexteditor to javafx.fxml;
     exports com.c159251.a1.jtexteditor;
 }

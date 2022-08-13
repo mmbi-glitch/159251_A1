@@ -93,7 +93,6 @@ public class EditorController {
         ClipboardContent content = new ClipboardContent();
         content.putString(textPane.getSelectedText());
         systemClipboard.setContent(content);
-        System.out.println("copied text = " + systemClipboard.getString());
     }
 
     public void cutText() {
@@ -101,18 +100,14 @@ public class EditorController {
         String text = textPane.getSelectedText();
         selectFrom = textPane.getCaretPosition() - text.length();
         selectTo = textPane.getCaretPosition();
-        System.out.println("selectFrom b4 = " + selectFrom);
-        System.out.println("selectTo b4 = " + selectTo);
         textPane.deleteText(selectFrom, selectTo);
         content.putString(text);
         systemClipboard.setContent(content);
-        System.out.println("cut text = " + systemClipboard.getString());
     }
 
     public void pasteText() {
         if (!systemClipboard.getString().isBlank()) {
             textPane.insertText(textPane.getCaretPosition(), systemClipboard.getString());
-            System.out.println("pasted text");
         }
     }
     @FXML
@@ -148,7 +143,6 @@ public class EditorController {
         if (!textPane.getText().isBlank()) {
             try (BufferedWriter fileWriter = new BufferedWriter(new FileWriter(fileToSave))) {
                 fileWriter.write(textPane.getText());
-
             } catch (IOException e) {
                 e.printStackTrace();
             }

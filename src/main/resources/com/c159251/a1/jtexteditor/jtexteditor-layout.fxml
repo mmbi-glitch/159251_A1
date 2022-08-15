@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import org.kordamp.ikonli.javafx.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.c159251.a1.jtexteditor.EditorController">
+   <top>
+      <VBox>
+         <children>
+            <AnchorPane fx:id="topAnchor" styleClass="menu-bar" BorderPane.alignment="CENTER">
+               <children>
+                   <MenuBar>
+                       <menus>
+                           <Menu mnemonicParsing="false" text="File">
+                               <items>
+                                   <MenuItem fx:id="openFile" mnemonicParsing="false" onAction="#onFileOpen" text="Open" />
+                                   <MenuItem fx:id="saveFile" mnemonicParsing="false" onAction="#onFileSave" text="Save" />
+                                   <MenuItem fx:id="saveFileAs" mnemonicParsing="false" onAction="#onFileSaveAs" text="Save As" />
+                                   <MenuItem mnemonicParsing="false" text="Export" />
+                                   <MenuItem fx:id="closeFile" mnemonicParsing="false" onAction="#onFileClose" text="Close" />
+                               </items>
+                           </Menu>
+                           <Menu mnemonicParsing="false" text="Edit">
+                               <items>
+                              <MenuItem fx:id="menuCut" mnemonicParsing="false" onAction="#cutText" text="Cut" />
+                              <MenuItem fx:id="menuCopy" mnemonicParsing="false" onAction="#copyText" text="Copy" />
+                              <MenuItem fx:id="menuPaste" mnemonicParsing="false" onAction="#pasteText" text="Paste" />
+                                   <MenuItem mnemonicParsing="false" text="Delete" />
+                               </items>
+                           </Menu>
+                           <Menu mnemonicParsing="false" text="Help">
+                               <items>
+                                   <MenuItem mnemonicParsing="false" text="About" />
+                               </items>
+                           </Menu>
+                       </menus>
+                   </MenuBar>
+                  <Label fx:id="dateTimeLabel" alignment="CENTER_RIGHT" contentDisplay="CENTER" layoutX="220.0" layoutY="4.0" prefHeight="17.0" prefWidth="136.0" text="&lt;date_goes_here&gt;" textAlignment="RIGHT" />
+               </children>
+            </AnchorPane>
+            <ButtonBar nodeOrientation="RIGHT_TO_LEFT">
+               <buttons>
+                  <Button fx:id="pasteBtn" mnemonicParsing="false" onAction="#pasteText" text="Paste">
+                     <graphic>
+                        <FontIcon iconLiteral="typ-clipboard" iconSize="20" />
+                     </graphic>
+                  </Button>
+                <Button fx:id="copyBtn" mnemonicParsing="false" onAction="#copyText" text="Copy">
+                     <graphic>
+                        <FontIcon iconLiteral="typ-document-text" iconSize="20" />
+                     </graphic>
+                  </Button>
+                  <Button fx:id="cutBtn" mnemonicParsing="false" onAction="#cutText" text="Cut">
+                     <graphic>
+                        <FontIcon iconLiteral="typ-scissors" iconSize="20" />
+                     </graphic>
+                  </Button>
+               </buttons>
+            </ButtonBar>
+         </children>
+      </VBox>
+   </top>
+   <center>
+      <ScrollPane fitToHeight="true" fitToWidth="true" BorderPane.alignment="CENTER">
+         <content>
+            <TextArea fx:id="textPane" prefHeight="200.0" prefWidth="200.0" wrapText="true" />
+         </content>
+      </ScrollPane>
+   </center>
+</BorderPane>

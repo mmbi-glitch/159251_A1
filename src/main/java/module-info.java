@@ -9,6 +9,7 @@ module com.c159251.a1.jtexteditor {
     requires java.xml;
     requires org.apache.pdfbox;
     requires org.slf4j;
+    requires org.slf4j.simple;
     requires kernel;
     requires pdfa;
     requires io;

@@ -31,7 +31,6 @@ public class EditorController {
     public Button pasteBtn;
     public int selectFrom;
     public int selectTo;
-    public AnchorPane topAnchor;
 
     @FXML
     public void initialize() {

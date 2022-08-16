@@ -1,23 +1,14 @@
 package com.c159251.a1.jtexteditor;
 
-import com.itextpdf.kernel.pdf.canvas.parser.PdfTextExtractor;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextArea;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
-import javafx.scene.layout.AnchorPane;
 import javafx.stage.FileChooser;
 import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.pdmodel.PDPage;
-import org.apache.pdfbox.pdmodel.PDPageContentStream;
-import org.apache.pdfbox.pdmodel.common.PDStream;
-import org.apache.pdfbox.pdmodel.font.*;
 import org.apache.pdfbox.text.PDFTextStripper;
-import org.apache.pdfbox.util.Charsets;
 import org.odftoolkit.odfdom.doc.OdfTextDocument;
 import org.odftoolkit.odfdom.dom.element.office.OfficeTextElement;
 import org.odftoolkit.odfdom.incubator.doc.text.OdfTextExtractor;
@@ -37,43 +28,46 @@ import java.io.*;
 
 public class EditorController {
 
-    public static File selectedFile;
-    public static Clipboard systemClipboard;
-    public MenuItem closeFile;
-    public MenuItem openFile;
-    public MenuItem saveFile;
-    public MenuItem saveFileAs;
-    public TextArea textPane;
-    public Button cutBtn;
-    public Button copyBtn;
-    public Button pasteBtn;
-    public Button selectBtn;
+    private static File selectedFile;
+    private static Clipboard systemClipboard;
+    @FXML
+    private MenuItem closeFile;
+    @FXML
+    private MenuItem openFile;
+    @FXML
+    private MenuItem saveFile;
+    @FXML
+    private MenuItem saveFileAs;
+    @FXML
+    private TextArea textPane;
+    @FXML
+    private Button cutBtn;
+    @FXML
+    private Button copyBtn;
+    @FXML
+    private Button pasteBtn;
+
     public int selectFrom;
     public int selectTo;
-    public String copiedText;
-    public String cutText;
-    public Label dateTimeLabel;
-    public AnchorPane topAnchor;
 
     @FXML
     public void initialize() {
         systemClipboard = Clipboard.getSystemClipboard();
-        //set date and time in menu
-        SimpleDateFormat formatter = new SimpleDateFormat("dd MMM yyyy HH:mm");
-        AnchorPane.setRightAnchor(dateTimeLabel,5.0);
-        dateTimeLabel.setText(formatter.format(new Date()));
-
+        // append date and time to text pane
+        SimpleDateFormat formatter = new SimpleDateFormat("HH:mm dd/MM/yyyy");
+        textPane.setText(formatter.format(new Date()));
+        textPane.appendText("\n\n");
     }
 
-    // close file on 'close' button press
+    // close editor on 'close' button press
     @FXML
-    protected void onFileClose(ActionEvent actionEvent) {
+    protected void onFileClose() {
         System.exit(0);
     }
 
     // open txt file on 'open' button press
     @FXML
-    public void onFileOpen(ActionEvent actionEvent) {
+    public void onFileOpen() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter("Plain Text (*.txt)", "*.txt"),

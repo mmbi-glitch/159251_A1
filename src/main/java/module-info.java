@@ -4,7 +4,7 @@ module com.c159251.a1.jtexteditor {
 
     requires org.controlsfx.controls;
     requires org.kordamp.ikonli.javafx;
-    requires org.kordamp.ikonli.typicons;
+    requires org.kordamp.ikonli.fontawesome5;
     requires odfdom.java;
     requires java.xml;
     requires org.apache.pdfbox;

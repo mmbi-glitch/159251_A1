@@ -8,7 +8,6 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextArea;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
-import javafx.scene.layout.AnchorPane;
 import javafx.stage.FileChooser;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -19,16 +18,25 @@ import java.io.*;
 
 public class EditorController {
 
-    public static File selectedFile;
-    public static Clipboard systemClipboard;
-    public MenuItem closeFile;
-    public MenuItem openFile;
-    public MenuItem saveFile;
-    public MenuItem saveFileAs;
-    public TextArea textPane;
-    public Button cutBtn;
-    public Button copyBtn;
-    public Button pasteBtn;
+    private static File selectedFile;
+    private static Clipboard systemClipboard;
+    @FXML
+    private MenuItem closeFile;
+    @FXML
+    private MenuItem openFile;
+    @FXML
+    private MenuItem saveFile;
+    @FXML
+    private MenuItem saveFileAs;
+    @FXML
+    private TextArea textPane;
+    @FXML
+    private Button cutBtn;
+    @FXML
+    private Button copyBtn;
+    @FXML
+    private Button pasteBtn;
+
     public int selectFrom;
     public int selectTo;
 
@@ -41,15 +49,15 @@ public class EditorController {
         textPane.appendText("\n\n");
     }
 
-    // close file on 'close' button press
+    // close program on 'close' button press
     @FXML
-    protected void onFileClose(ActionEvent actionEvent) {
+    protected void onFileClose() {
         System.exit(0);
     }
 
     // open txt file on 'open' button press
     @FXML
-    public void onFileOpen(ActionEvent actionEvent) {
+    public void onFileOpen() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().add(
                 new FileChooser.ExtensionFilter("Text files (*.odt, *.txt)", "*.txt", "*.odt")

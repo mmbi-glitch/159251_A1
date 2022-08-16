@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ButtonBar?>
 <?import javafx.scene.control.Menu?>
@@ -45,20 +46,26 @@
                <buttons>
                   <Button fx:id="pasteBtn" mnemonicParsing="false" onAction="#pasteText" text="Paste">
                      <graphic>
-                        <FontIcon iconLiteral="typ-clipboard" iconSize="20" />
+                        <FontIcon iconLiteral="far-clipboard" iconSize="16" />
                      </graphic>
                   </Button>
                 <Button fx:id="copyBtn" mnemonicParsing="false" onAction="#copyText" text="Copy">
                      <graphic>
-                        <FontIcon iconLiteral="typ-document-text" iconSize="20" />
+                        <FontIcon iconLiteral="far-copy" iconSize="16" />
                      </graphic>
                   </Button>
                   <Button fx:id="cutBtn" mnemonicParsing="false" onAction="#cutText" text="Cut">
                      <graphic>
-                        <FontIcon iconLiteral="typ-scissors" iconSize="20" />
+                        <FontIcon iconLiteral="fas-cut" iconSize="16" />
                      </graphic>
                   </Button>
                </buttons>
+               <opaqueInsets>
+                  <Insets />
+               </opaqueInsets>
+               <VBox.margin>
+                  <Insets bottom="2.0" left="2.0" top="2.0" />
+               </VBox.margin>
             </ButtonBar>
          </children>
       </VBox>

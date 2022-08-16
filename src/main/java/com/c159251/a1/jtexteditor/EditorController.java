@@ -29,22 +29,17 @@ public class EditorController {
     public Button cutBtn;
     public Button copyBtn;
     public Button pasteBtn;
-    public Button selectBtn;
     public int selectFrom;
     public int selectTo;
-    public String copiedText;
-    public String cutText;
-    public Label dateTimeLabel;
     public AnchorPane topAnchor;
 
     @FXML
     public void initialize() {
         systemClipboard = Clipboard.getSystemClipboard();
-        //set date and time in menu
-        SimpleDateFormat formatter = new SimpleDateFormat("dd MMM yyyy HH:mm");
-        AnchorPane.setRightAnchor(dateTimeLabel,5.0);
-        dateTimeLabel.setText(formatter.format(new Date()));
-
+        // append date and time to text pane
+        SimpleDateFormat formatter = new SimpleDateFormat("HH:mm dd/MM/yyyy");
+        textPane.setText(formatter.format(new Date()));
+        textPane.appendText("\n\n");
     }
 
     // close file on 'close' button press

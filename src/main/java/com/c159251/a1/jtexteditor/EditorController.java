@@ -48,7 +48,6 @@ public class EditorController {
     private Button pasteBtn;
 
     private SimpleDateFormat formatter;
-
     public int selectFrom;
     public int selectTo;
 
@@ -61,7 +60,7 @@ public class EditorController {
         textPane.appendText("\n\n");
     }
 
-    // close editor on 'close' button press
+    // close program on 'close' button press
     @FXML
     protected void onFileClose() {
         System.exit(0);

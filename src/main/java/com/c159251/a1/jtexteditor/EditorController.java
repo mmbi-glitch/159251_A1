@@ -1,11 +1,10 @@
 package com.c159251.a1.jtexteditor;
 
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.TextArea;
+import javafx.scene.control.*;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
+import javafx.scene.layout.HBox;
 import javafx.stage.FileChooser;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
@@ -20,6 +19,7 @@ import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.Paragraph;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
 import java.io.*;
@@ -46,10 +46,24 @@ public class EditorController {
     private Button copyBtn;
     @FXML
     private Button pasteBtn;
+    @FXML
+    private Button searchBtn;
+    @FXML
+    private HBox searchBar;
+    @FXML
+    private TextField searchField;
+    @FXML
+    private Label searchMatches;
 
     private SimpleDateFormat formatter;
-    public int selectFrom;
-    public int selectTo;
+
+    public int cutFrom;
+    public int cutTo;
+
+    public int searchCount, selectCount;
+    ArrayList<Integer> selectFrom;
+    ArrayList<Integer> selectTo;
+
 
     @FXML
     public void initialize() {
@@ -58,6 +72,10 @@ public class EditorController {
         formatter = new SimpleDateFormat("HH:mm dd/MM/yyyy");
         textPane.setText(formatter.format(new Date()));
         textPane.appendText("\n\n");
+        searchBar.setManaged(false);
+        searchBar.setVisible(false);
+        selectFrom = new ArrayList<>();
+        selectTo = new ArrayList<>();
     }
 
     // close program on 'close' button press
@@ -156,18 +174,105 @@ public class EditorController {
     public void cutText() {
         ClipboardContent content = new ClipboardContent();
         String text = textPane.getSelectedText();
-        selectFrom = textPane.getCaretPosition() - text.length();
-        selectTo = textPane.getCaretPosition();
-        textPane.deleteText(selectFrom, selectTo);
+        cutFrom = textPane.getCaretPosition() - text.length();
+        cutTo = textPane.getCaretPosition();
+        textPane.deleteText(cutFrom, cutTo);
         content.putString(text);
         systemClipboard.setContent(content);
+        onSearchTextChanged();
     }
 
     public void pasteText() {
         if (!systemClipboard.getString().isBlank()) {
             textPane.insertText(textPane.getCaretPosition(), systemClipboard.getString());
+            onSearchTextChanged();
         }
     }
+
+    public void searchText() {
+        searchBar.setManaged(true);
+        searchBar.setVisible(true);
+    }
+
+    public void onSearchTextChanged() {
+        String searchedText = searchField.getText();
+        // first, ofc, the text could be blank, so we deal with that issue first
+        if (searchedText.isBlank()) {
+            textPane.selectRange(0,0);
+            searchMatches.setText("No matches");
+            return;
+        }
+
+        // then, if it's not blank, then obv we need to search for it
+
+        // init vars here
+        searchCount = 0;
+        int searchFrom = 0;
+        int searchTo = textPane.getText().length();
+        selectFrom.clear();
+        selectTo.clear();
+
+        // first, we see if there's one instance of searched text in the entire text of the textarea
+        if (textPane.getText().contains(searchedText)) {
+            // searching for the starting index of the searched text
+            int searchIndex = textPane.getText().indexOf(searchedText);
+            // add the indices to the arraylists
+            selectFrom.add(searchIndex);
+            selectTo.add(searchIndex + searchedText.length());
+            searchFrom = selectTo.get(searchCount);
+            searchCount++;
+            // then, we check if there are more instances
+            // but this time, we only check from the text in the textarea that starts from the ENDING index
+            // of the previous found instance of the searched text
+            while (textPane.getText(searchFrom, searchTo).contains(searchedText)) {
+                // we have to add the searchFrom param here to specify that we want to search from the given index
+                searchIndex = textPane.getText().indexOf(searchedText, searchFrom);
+                // this is the same as from above - no change
+                selectFrom.add(searchIndex);
+                selectTo.add(searchIndex + searchedText.length());
+                searchFrom = selectTo.get(searchCount);
+                searchCount++;
+            }
+            // select text to the first occurrence
+            selectCount = 0;
+            textPane.selectRange(selectFrom.get(selectCount), selectTo.get(selectCount));
+            searchMatches.setText((selectCount + 1) + " of " + searchCount + " matches");
+        }
+        else {
+            // otherwise, we just set it to none found
+            textPane.selectRange(0,0);
+            searchMatches.setText("No matches");
+        }
+    }
+
+    public void searchForNext() {
+        selectCount++;
+        if (selectCount == searchCount) {
+            selectCount = 0;
+        }
+        if (!selectFrom.isEmpty() && !selectTo.isEmpty()) {
+            textPane.selectRange(selectFrom.get(selectCount), selectTo.get(selectCount));
+            searchMatches.setText((selectCount + 1) + " of " + searchCount + " matches");
+        }
+    }
+
+    public void searchForPrevious() {
+        selectCount--;
+        if (selectCount == -1) {
+            selectCount = searchCount - 1;
+        }
+        if (!selectFrom.isEmpty() && !selectTo.isEmpty()) {
+            textPane.selectRange(selectFrom.get(selectCount), selectTo.get(selectCount));
+            searchMatches.setText((selectCount + 1) + " of " + searchCount + " matches");
+        }
+    }
+
+    public void closeSearch() {
+        searchBar.setManaged(false);
+        searchBar.setVisible(false);
+    }
+
+
     @FXML
     protected void onFileSave() {
         //if save is triggered with no stored file, then it should try as a 'save as'

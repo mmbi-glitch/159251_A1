@@ -28,8 +28,8 @@ import java.io.*;
 
 public class EditorController {
 
-    private static File selectedFile;
-    private static Clipboard systemClipboard;
+    private File selectedFile;
+    private Clipboard systemClipboard;
     @FXML
     private MenuItem closeFile;
     @FXML
@@ -47,6 +47,8 @@ public class EditorController {
     @FXML
     private Button pasteBtn;
 
+    private SimpleDateFormat formatter;
+
     public int selectFrom;
     public int selectTo;
 
@@ -54,7 +56,7 @@ public class EditorController {
     public void initialize() {
         systemClipboard = Clipboard.getSystemClipboard();
         // append date and time to text pane
-        SimpleDateFormat formatter = new SimpleDateFormat("HH:mm dd/MM/yyyy");
+        formatter = new SimpleDateFormat("HH:mm dd/MM/yyyy");
         textPane.setText(formatter.format(new Date()));
         textPane.appendText("\n\n");
     }
@@ -94,7 +96,8 @@ public class EditorController {
             PDFTextStripper extractor = new PDFTextStripper();
             String fileToText = extractor.getText(document);
             if (!fileToText.isBlank()) {
-                textPane.setText(fileToText);
+                textPane.setText(formatter.format(new Date()));
+                textPane.appendText("\n\n" + fileToText);
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -109,14 +112,13 @@ public class EditorController {
             OdfTextExtractor extractor;
             while (element != null) {
                 extractor = OdfTextExtractor.newOdfTextExtractor(element);
-                fileToText.append(extractor.getText() + "\n");
+                fileToText.append(extractor.getText()).append("\n");
                 root.removeChild(element);
                 element = root.getFirstChildElement();
             }
-            System.out.println(fileToText.toString());
-            System.out.println(fileToText);
-            if (!fileToText.isEmpty()) {
-                textPane.setText(fileToText.toString());
+            if (!fileToText.toString().isBlank()) {
+                textPane.setText(formatter.format(new Date()));
+                textPane.appendText("\n\n" + fileToText);
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -226,13 +228,12 @@ public class EditorController {
                 OfficeTextElement officeText = document.getContentRoot();
                 Node childNode = officeText.getLastChild();
                 OdfTextParagraph paragraph;
-                if (OdfTextParagraph.class.isInstance(childNode)) {
-                    paragraph = (OdfTextParagraph) childNode;
+                if (childNode instanceof OdfTextParagraph odfTextParagraph) {
+                    paragraph = odfTextParagraph;
                 }
                 else {
                     paragraph = new OdfTextParagraph(document.getContentDom());
                 }
-                System.out.println(childNode.getNodeName());
                 paragraph.addContentWhitespace(textPane.getText());
                 document.save(fileToSave);
             } catch (Exception e) {

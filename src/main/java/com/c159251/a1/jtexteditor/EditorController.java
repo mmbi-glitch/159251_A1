@@ -7,6 +7,18 @@ import javafx.scene.control.TextArea;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.stage.FileChooser;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.text.PDFTextStripper;
+import org.odftoolkit.odfdom.doc.OdfTextDocument;
+import org.odftoolkit.odfdom.dom.element.office.OfficeTextElement;
+import org.odftoolkit.odfdom.incubator.doc.text.OdfTextExtractor;
+import org.odftoolkit.odfdom.incubator.doc.text.OdfTextParagraph;
+import org.odftoolkit.odfdom.pkg.OdfElement;
+import org.w3c.dom.Node;
+import com.itextpdf.kernel.pdf.*;
+import com.itextpdf.layout.Document;
+import com.itextpdf.layout.element.Paragraph;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -16,8 +28,8 @@ import java.io.*;
 
 public class EditorController {
 
-    private static File selectedFile;
-    private static Clipboard systemClipboard;
+    private File selectedFile;
+    private Clipboard systemClipboard;
     @FXML
     private MenuItem closeFile;
     @FXML
@@ -35,6 +47,7 @@ public class EditorController {
     @FXML
     private Button pasteBtn;
 
+    private SimpleDateFormat formatter;
     public int selectFrom;
     public int selectTo;
 
@@ -42,7 +55,7 @@ public class EditorController {
     public void initialize() {
         systemClipboard = Clipboard.getSystemClipboard();
         // append date and time to text pane
-        SimpleDateFormat formatter = new SimpleDateFormat("HH:mm dd/MM/yyyy");
+        formatter = new SimpleDateFormat("HH:mm dd/MM/yyyy");
         textPane.setText(formatter.format(new Date()));
         textPane.appendText("\n\n");
     }
@@ -57,15 +70,60 @@ public class EditorController {
     @FXML
     public void onFileOpen() {
         FileChooser fileChooser = new FileChooser();
-        fileChooser.getExtensionFilters().add(
-                new FileChooser.ExtensionFilter("Text files (*.odt, *.txt)", "*.txt", "*.odt")
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Plain Text (*.txt)", "*.txt"),
+                new FileChooser.ExtensionFilter("OpenDocument Text (*.odt)", "*.odt"),
+                new FileChooser.ExtensionFilter("PDF (*.pdf)", "*.pdf")
         );
         fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
         selectedFile = fileChooser.showOpenDialog(null);
         if (selectedFile != null) {
+            if (selectedFile.getName().contains(".odt")) {
+                loadTextFromOdtFile(selectedFile);
+                return;
+            }
+            if (selectedFile.getName().contains(".pdf")) {
+                loadTextFromPdfFile(selectedFile);
+                return;
+            }
             loadTextFromFile(selectedFile);
         }
     }
+
+    protected void loadTextFromPdfFile(File fileToLoad) {
+        try (PDDocument document = PDDocument.load(fileToLoad)) {
+            PDFTextStripper extractor = new PDFTextStripper();
+            String fileToText = extractor.getText(document);
+            if (!fileToText.isBlank()) {
+                textPane.setText(formatter.format(new Date()));
+                textPane.appendText("\n\n" + fileToText);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    protected void loadTextFromOdtFile(File fileToLoad) {
+        try (OdfTextDocument document = OdfTextDocument.loadDocument(fileToLoad)) {
+            OfficeTextElement root = document.getContentRoot();
+            StringBuilder fileToText = new StringBuilder();
+            OdfElement element = root.getFirstChildElement();
+            OdfTextExtractor extractor;
+            while (element != null) {
+                extractor = OdfTextExtractor.newOdfTextExtractor(element);
+                fileToText.append(extractor.getText()).append("\n");
+                root.removeChild(element);
+                element = root.getFirstChildElement();
+            }
+            if (!fileToText.toString().isBlank()) {
+                textPane.setText(formatter.format(new Date()));
+                textPane.appendText("\n\n" + fileToText);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 
     protected void loadTextFromFile(File fileToLoad) {
         StringBuilder fileToText;
@@ -117,16 +175,21 @@ public class EditorController {
             onFileSaveAs();
             return;
         }
-        saveTextToFile(selectedFile);
+        if (selectedFile.getName().contains(".odt")) {
+            saveTextToOdtFile(selectedFile);
+            return;
+        }
+        saveTextToTxtFile(selectedFile);
     }
 
     @FXML
     protected void onFileSaveAs() {
         FileChooser fileChooser = new FileChooser();
-        fileChooser.getExtensionFilters().add(
-                new FileChooser.ExtensionFilter("Text files (*.txt)", "*.txt")
-        );
-        // if saved file is null, set to default directory
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Plain Text (*.txt)", "*.txt"),
+                new FileChooser.ExtensionFilter("OpenDocument Text (*.odt)", "*.odt"),
+                new FileChooser.ExtensionFilter("PDF (*.pdf)", "*.pdf")
+        );        // if saved file is null, set to default directory
         fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
         // otherwise, set to parent directory of saved file
         if (selectedFile != null) {
@@ -134,11 +197,51 @@ public class EditorController {
         }
         selectedFile = fileChooser.showSaveDialog(null);
         if (selectedFile != null) {
-            saveTextToFile(selectedFile);
+            if (selectedFile.getName().contains(".odt")) {
+                saveTextToOdtFile(selectedFile);
+                return;
+            }
+            if (selectedFile.getName().contains(".pdf")) {
+                saveTextToPdfFile(selectedFile);
+                return;
+            }
+            saveTextToTxtFile(selectedFile);
         }
     }
 
-    public void saveTextToFile(File fileToSave) {
+    public void saveTextToPdfFile(File fileToSave) {
+        if (!textPane.getText().isBlank()) {
+            try (PdfDocument pdf = new PdfDocument(new PdfWriter(fileToSave))) {
+                Document doc = new Document(pdf);
+                doc.add(new Paragraph(textPane.getText()));
+                doc.close();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    public void saveTextToOdtFile(File fileToSave) {
+        if (!textPane.getText().isBlank()) {
+            try (OdfTextDocument document = OdfTextDocument.newTextDocument()) {
+                OfficeTextElement officeText = document.getContentRoot();
+                Node childNode = officeText.getLastChild();
+                OdfTextParagraph paragraph;
+                if (childNode instanceof OdfTextParagraph odfTextParagraph) {
+                    paragraph = odfTextParagraph;
+                }
+                else {
+                    paragraph = new OdfTextParagraph(document.getContentDom());
+                }
+                paragraph.addContentWhitespace(textPane.getText());
+                document.save(fileToSave);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    public void saveTextToTxtFile(File fileToSave) {
         //if the text is not blank, then write text to file
         if (!textPane.getText().isBlank()) {
             try (BufferedWriter fileWriter = new BufferedWriter(new FileWriter(fileToSave))) {

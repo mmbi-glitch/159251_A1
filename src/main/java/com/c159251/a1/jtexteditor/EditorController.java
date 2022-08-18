@@ -57,14 +57,13 @@ public class EditorController {
 
     private SimpleDateFormat formatter;
 
-    public int cutFrom;
-    public int cutTo;
-
-    public int searchCount, selectCount;
+    private int searchCount;
+    private int selectCount;
     ArrayList<Integer> selectFrom;
     ArrayList<Integer> selectTo;
 
 
+    // ---------------------------- initializing method --------------------------------------- /
     @FXML
     public void initialize() {
         systemClipboard = Clipboard.getSystemClipboard();
@@ -78,13 +77,13 @@ public class EditorController {
         selectTo = new ArrayList<>();
     }
 
-    // close program on 'close' button press
+    // ---------------------------- FILE MENU close and open methods  --------------------------------------- /
+
     @FXML
     protected void onFileClose() {
         System.exit(0);
     }
 
-    // open txt file on 'open' button press
     @FXML
     public void onFileOpen() {
         FileChooser fileChooser = new FileChooser();
@@ -104,9 +103,11 @@ public class EditorController {
                 loadTextFromPdfFile(selectedFile);
                 return;
             }
-            loadTextFromFile(selectedFile);
+            loadTextFromTxtFile(selectedFile);
         }
     }
+
+    // ---------------------------- 'loading text from file' methods --------------------------------------- /
 
     protected void loadTextFromPdfFile(File fileToLoad) {
         try (PDDocument document = PDDocument.load(fileToLoad)) {
@@ -143,7 +144,7 @@ public class EditorController {
     }
 
 
-    protected void loadTextFromFile(File fileToLoad) {
+    protected void loadTextFromTxtFile(File fileToLoad) {
         StringBuilder fileToText;
         // load text in file using a buffered file reader
         try (BufferedReader fileReader = new BufferedReader(new FileReader(fileToLoad))) {
@@ -165,21 +166,24 @@ public class EditorController {
 
     }
 
-    public void copyText() {
-        ClipboardContent content = new ClipboardContent();
-        content.putString(textPane.getSelectedText());
-        systemClipboard.setContent(content);
-    }
+    // ------------------------- EDIT MENU & BUTTON cut/copy/paste/search methods -------------------------- /
 
     public void cutText() {
         ClipboardContent content = new ClipboardContent();
         String text = textPane.getSelectedText();
-        cutFrom = textPane.getCaretPosition() - text.length();
-        cutTo = textPane.getCaretPosition();
+        int cutFrom = textPane.getCaretPosition() - text.length();
+        int cutTo = textPane.getCaretPosition();
         textPane.deleteText(cutFrom, cutTo);
         content.putString(text);
         systemClipboard.setContent(content);
         onSearchTextChanged();
+    }
+
+
+    public void copyText() {
+        ClipboardContent content = new ClipboardContent();
+        content.putString(textPane.getSelectedText());
+        systemClipboard.setContent(content);
     }
 
     public void pasteText() {
@@ -196,14 +200,14 @@ public class EditorController {
 
     public void onSearchTextChanged() {
         String searchedText = searchField.getText();
-        // first, ofc, the text could be blank, so we deal with that issue first
+        // first, the text could be blank, so we deal with that issue first
         if (searchedText.isBlank()) {
             textPane.selectRange(0,0);
             searchMatches.setText("No matches");
             return;
         }
 
-        // then, if it's not blank, then obv we need to search for it
+        // then, if it's not blank, then we need to search for it
 
         // init vars here
         searchCount = 0;
@@ -273,6 +277,8 @@ public class EditorController {
     }
 
 
+    // ---------------------------- FILE MENU save and save as methods ------------------------------------ /
+
     @FXML
     protected void onFileSave() {
         //if save is triggered with no stored file, then it should try as a 'save as'
@@ -313,6 +319,8 @@ public class EditorController {
             saveTextToTxtFile(selectedFile);
         }
     }
+
+    // ---------------------------- 'saving text to file' methods --------------------------------------- /
 
     public void saveTextToPdfFile(File fileToSave) {
         if (!textPane.getText().isBlank()) {

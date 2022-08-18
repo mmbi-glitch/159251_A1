@@ -3,12 +3,15 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ButtonBar?>
+<?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 
@@ -44,6 +47,11 @@
                 </MenuBar>
                 <ButtonBar nodeOrientation="RIGHT_TO_LEFT">
                     <buttons>
+                  <Button fx:id="searchBtn" mnemonicParsing="false" onAction="#searchText" text="Search">
+                     <graphic>
+                        <FontIcon iconLiteral="fas-search" iconSize="16" />
+                     </graphic>
+                  </Button>
                         <Button fx:id="pasteBtn" mnemonicParsing="false" onAction="#pasteText" text="Paste">
                             <graphic>
                                 <FontIcon iconLiteral="far-clipboard" iconSize="16" />
@@ -67,6 +75,27 @@
                         <Insets bottom="2.0" left="2.0" top="2.0" />
                     </VBox.margin>
                 </ButtonBar>
+            <HBox fx:id="searchBar" prefHeight="0.0" prefWidth="270.0">
+               <children>
+                  <Button mnemonicParsing="false" onAction="#closeSearch">
+                     <graphic>
+                        <FontIcon iconLiteral="fas-times-circle" iconSize="16" />
+                     </graphic>
+                  </Button>
+                  <TextField fx:id="searchField" onKeyTyped="#onSearchTextChanged" />
+                  <Button mnemonicParsing="false" onAction="#searchForPrevious">
+                     <graphic>
+                        <FontIcon iconLiteral="fas-chevron-up" iconSize="16" />
+                     </graphic>
+                  </Button>
+                  <Button mnemonicParsing="false" onAction="#searchForNext">
+                     <graphic>
+                        <FontIcon iconLiteral="fas-chevron-down" iconSize="16" />
+                     </graphic>
+                  </Button>
+                  <Label fx:id="searchMatches" alignment="CENTER" prefHeight="24.0" prefWidth="120.0" text="No matches" />
+               </children>
+            </HBox>
             </children>
         </VBox>
     </top>

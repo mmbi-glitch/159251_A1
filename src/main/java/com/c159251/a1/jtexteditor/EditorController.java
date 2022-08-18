@@ -171,9 +171,10 @@ public class EditorController {
     public void cutText() {
         ClipboardContent content = new ClipboardContent();
         String text = textPane.getSelectedText();
-        int cutFrom = textPane.getCaretPosition() - text.length();
-        int cutTo = textPane.getCaretPosition();
-        textPane.deleteText(cutFrom, cutTo);
+        //fixing this particular action, it needs the anchor value (anchor and caretPosition make up the selection range)
+        int selectFrom = Math.min(textPane.getCaretPosition(),textPane.getAnchor());
+        int selectTo = Math.max(textPane.getCaretPosition(),textPane.getAnchor());
+        textPane.deleteText(selectFrom, selectTo);
         content.putString(text);
         systemClipboard.setContent(content);
         onSearchTextChanged();

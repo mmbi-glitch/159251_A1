@@ -189,8 +189,11 @@ public class EditorController {
 
     public void pasteText() {
         if (!systemClipboard.getString().isBlank()) {
-            textPane.insertText(textPane.getCaretPosition(), systemClipboard.getString());
-            onSearchTextChanged();
+            // fixing paste issue where the caret position keeps moving
+            int caretPos = textPane.getCaretPosition(); // storing the caret position
+            textPane.insertText(caretPos, systemClipboard.getString());
+            onSearchTextChanged(); // this function messes with the caret position
+            textPane.positionCaret(caretPos + systemClipboard.getString().length()); // resetting the caret position
         }
     }
 

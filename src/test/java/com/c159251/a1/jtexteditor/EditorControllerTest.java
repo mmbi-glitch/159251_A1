@@ -2,6 +2,8 @@ package com.c159251.a1.jtexteditor;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.testfx.framework.junit5.ApplicationTest;
+
 
 import java.io.File;
 

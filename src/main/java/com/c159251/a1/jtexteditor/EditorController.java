@@ -145,6 +145,14 @@ public class EditorController {
 
 
     protected void loadTextFromTxtFile(File fileToLoad) {
+        String fileToText = getTextFromTxtFile(fileToLoad);
+        if (!fileToText.isEmpty()) {
+            textPane.setText(fileToText);
+        }
+    }
+
+    // sample function to get text
+    public String getTextFromTxtFile(File fileToLoad) {
         StringBuilder fileToText;
         // load text in file using a buffered file reader
         try (BufferedReader fileReader = new BufferedReader(new FileReader(fileToLoad))) {
@@ -155,16 +163,14 @@ public class EditorController {
                 fileToText.append(line).append("\n");
             }
             // if successfully loaded, populate textPane with file text
-            if (!fileToText.isEmpty()) {
-                textPane.setText(fileToText.toString());
-            }
-
+            return fileToText.toString();
         }
         catch (IOException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
 
     }
+
 
     // ------------------------- EDIT MENU & BUTTON cut/copy/paste/search methods -------------------------- /
 

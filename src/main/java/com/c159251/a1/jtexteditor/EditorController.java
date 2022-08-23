@@ -182,9 +182,16 @@ public class EditorController {
 
 
     public void copyText() {
+//        ClipboardContent content = new ClipboardContent();
+//        content.putString(textPane.getSelectedText());
+//        systemClipboard.setContent(content);
+        putToClipBoard(textPane.getSelectedText(),systemClipboard);
+    }
+
+    void putToClipBoard(String clip, Clipboard clipboard) {
         ClipboardContent content = new ClipboardContent();
-        content.putString(textPane.getSelectedText());
-        systemClipboard.setContent(content);
+        content.putString(clip);
+        clipboard.setContent(content);
     }
 
     public void pasteText() {

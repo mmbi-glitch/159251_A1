@@ -84,9 +84,22 @@
             <version>1.7.36</version>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>5.9.0</version>
+            <scope>compile</scope>
+        </dependency>
+
+
+
     </dependencies>
 
     <build>
+
+        <testSourceDirectory>src/test/java</testSourceDirectory>
+
+
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

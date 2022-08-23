@@ -175,29 +175,24 @@ public class EditorController {
     // ------------------------- EDIT MENU & BUTTON cut/copy/paste/search methods -------------------------- /
 
     public void cutText() {
-        ClipboardContent content = new ClipboardContent();
-        String text = textPane.getSelectedText();
+        setClipBoardText(textPane.getSelectedText());
         //fixing this particular action, it needs the anchor value (anchor and caretPosition make up the selection range)
-        int selectFrom = Math.min(textPane.getCaretPosition(),textPane.getAnchor());
-        int selectTo = Math.max(textPane.getCaretPosition(),textPane.getAnchor());
-        textPane.deleteText(selectFrom, selectTo);
-        content.putString(text);
-        systemClipboard.setContent(content);
+        textPane.deleteText(Math.min(textPane.getCaretPosition(),textPane.getAnchor()), Math.max(textPane.getCaretPosition(),textPane.getAnchor()));
         onSearchTextChanged();
     }
 
-
     public void copyText() {
-//        ClipboardContent content = new ClipboardContent();
-//        content.putString(textPane.getSelectedText());
-//        systemClipboard.setContent(content);
-        putToClipBoard(textPane.getSelectedText(),systemClipboard);
+        setClipBoardText(textPane.getSelectedText());
     }
 
-    void putToClipBoard(String clip, Clipboard clipboard) {
+    void setClipBoardText(String clip) {
         ClipboardContent content = new ClipboardContent();
         content.putString(clip);
-        clipboard.setContent(content);
+        systemClipboard.setContent(content);
+    }
+
+    String getClipBoardText() {
+        return systemClipboard.getString();
     }
 
     public void pasteText() {

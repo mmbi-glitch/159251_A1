@@ -309,6 +309,14 @@ public class EditorController {
 
     // ---------------------------- FILE MENU save and save as methods ------------------------------------ /
 
+    File getSelectedFile() {
+        return this.selectedFile;
+    }
+
+    void setSelectedFile(File file) {
+        this.selectedFile = file;
+    }
+
     @FXML
     protected void onFileSave() {
         //if save is triggered with no stored file, then it should try as a 'save as'

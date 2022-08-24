@@ -19,6 +19,9 @@ import org.testfx.util.WaitForAsyncUtils;
 
 import java.io.File;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 @ExtendWith(ApplicationExtension.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class EditorLauncherTest {
@@ -150,4 +153,48 @@ class EditorLauncherTest {
         Assertions.assertThat(editorController.getSearchMatchesLabel()).hasText("2 of 2 matches");
     }
 
+    @Test
+    void saveToText() {
+
+        editorController.setSelectedFile(new File("src/test/java/com/c159251/a1/jtexteditor/testSave.txt"));
+        editorController.getTextPane().setText("Testing file");
+        editorController.saveTextToTxtFile(editorController.getSelectedFile());
+        File tempFile = new File("src/test/java/com/c159251/a1/jtexteditor/testSave.txt");
+        assertTrue(tempFile.exists());
+        //clean up
+        tempFile.delete();
+        assertFalse(tempFile.exists());
+
+
+    }
+
+    @Test
+    void saveToOdt() {
+
+        editorController.setSelectedFile(new File("src/test/java/com/c159251/a1/jtexteditor/testSave.odt"));
+        editorController.getTextPane().setText("Testing ODT file");
+        editorController.saveTextToOdtFile(editorController.getSelectedFile());
+        File tempFile = new File("src/test/java/com/c159251/a1/jtexteditor/testSave.odt");
+        assertTrue(tempFile.exists());
+        //clean up
+        tempFile.delete();
+        assertFalse(tempFile.exists());
+
+
+    }
+
+    @Test
+    void saveToPdf() {
+
+        editorController.setSelectedFile(new File("src/test/java/com/c159251/a1/jtexteditor/testSave.pdf"));
+        editorController.getTextPane().setText("Testing PDF file");
+        editorController.saveTextToOdtFile(editorController.getSelectedFile());
+        File tempFile = new File("src/test/java/com/c159251/a1/jtexteditor/testSave.pdf");
+        assertTrue(tempFile.exists());
+        //clean up
+        tempFile.delete();
+        assertFalse(tempFile.exists());
+
+
+    }
 }

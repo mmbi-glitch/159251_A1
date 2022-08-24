@@ -88,7 +88,7 @@
                         <FontIcon iconLiteral="fas-chevron-up" iconSize="16" />
                      </graphic>
                   </Button>
-                  <Button mnemonicParsing="false" onAction="#searchForNext">
+                  <Button mnemonicParsing="false" onAction="#searchForNext" fx:id="searchForNextBtn">
                      <graphic>
                         <FontIcon iconLiteral="fas-chevron-down" iconSize="16" />
                      </graphic>

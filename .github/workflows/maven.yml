@@ -24,4 +24,4 @@ jobs:
         cache: maven
     # Run maven tests
     - name: Run tests with Maven
-      run: mvn -B clean test
+      run: xvfb-run mvn -B clean test

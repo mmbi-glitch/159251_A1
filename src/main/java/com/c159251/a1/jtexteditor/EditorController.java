@@ -1,9 +1,11 @@
 package com.c159251.a1.jtexteditor;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.DataFormat;
 import javafx.scene.layout.HBox;
 import javafx.stage.FileChooser;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -30,6 +32,7 @@ public class EditorController {
 
     private File selectedFile;
     private Clipboard systemClipboard;
+    private String clipboardText;
     @FXML
     private MenuItem closeFile;
     @FXML
@@ -77,6 +80,24 @@ public class EditorController {
         selectTo = new ArrayList<>();
     }
 
+    // ---------------------------- getters ----------------------------------- //
+
+    public String getClipboardText() {
+        return clipboardText;
+    }
+
+    public TextArea getTextPane() {
+        return textPane;
+    }
+
+    public Label getSearchMatchesLabel() {
+        return searchMatches;
+    }
+
+    public TextField getSearchField() {
+        return searchField;
+    }
+
     // ---------------------------- FILE MENU close and open methods  --------------------------------------- /
 
     @FXML
@@ -93,32 +114,19 @@ public class EditorController {
                 new FileChooser.ExtensionFilter("PDF (*.pdf)", "*.pdf")
         );
         fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
-        setSelectedFile(fileChooser.showOpenDialog(null));
+        selectedFile = fileChooser.showOpenDialog(null);
         if (selectedFile != null) {
-            if (getSelectedFileName().contains(".odt")) {
+            if (selectedFile.getName().contains(".odt")) {
                 loadTextFromOdtFile(selectedFile);
                 return;
             }
-            if (getSelectedFileName().contains(".pdf")) {
+            if (selectedFile.getName().contains(".pdf")) {
                 loadTextFromPdfFile(selectedFile);
                 return;
             }
             loadTextFromTxtFile(selectedFile);
         }
     }
-
-    void setSelectedFile(File file) {
-        this.selectedFile = file;
-    }
-
-    File getSelectedFile() {
-        return selectedFile;
-    }
-
-    String getSelectedFileName() {
-        return this.selectedFile.getName();
-    }
-
 
     // ---------------------------- 'loading text from file' methods --------------------------------------- /
 
@@ -127,8 +135,8 @@ public class EditorController {
             PDFTextStripper extractor = new PDFTextStripper();
             String fileToText = extractor.getText(document);
             if (!fileToText.isBlank()) {
-                textPane.setText(formatter.format(new Date()));
-                textPane.appendText("\n\n" + fileToText);
+//                textPane.setText(formatter.format(new Date()));
+                textPane.setText(fileToText);
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -148,8 +156,8 @@ public class EditorController {
                 element = root.getFirstChildElement();
             }
             if (!fileToText.toString().isBlank()) {
-                textPane.setText(formatter.format(new Date()));
-                textPane.appendText("\n\n" + fileToText);
+//                textPane.setText(formatter.format(new Date()));
+                textPane.setText(fileToText.toString());
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -158,14 +166,6 @@ public class EditorController {
 
 
     protected void loadTextFromTxtFile(File fileToLoad) {
-        String fileToText = getTextFromTxtFile(fileToLoad);
-        if (!fileToText.isEmpty()) {
-            textPane.setText(fileToText);
-        }
-    }
-
-    // sample function to get text
-    public String getTextFromTxtFile(File fileToLoad) {
         StringBuilder fileToText;
         // load text in file using a buffered file reader
         try (BufferedReader fileReader = new BufferedReader(new FileReader(fileToLoad))) {
@@ -176,88 +176,61 @@ public class EditorController {
                 fileToText.append(line).append("\n");
             }
             // if successfully loaded, populate textPane with file text
-            return fileToText.toString();
+            if (!fileToText.isEmpty()) {
+                textPane.setText(fileToText.toString());
+            }
+
         }
         catch (IOException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
         }
 
     }
-
-    //helper function, gets the whole text pane to use in testing functions
-    TextArea getTextPane() {
-        return this.textPane;
-    }
-
 
     // ------------------------- EDIT MENU & BUTTON cut/copy/paste/search methods -------------------------- /
 
-
     public void cutText() {
-        setClipboardText(textPane.getSelectedText());
+        ClipboardContent content = new ClipboardContent();
+        String text = textPane.getSelectedText();
         //fixing this particular action, it needs the anchor value (anchor and caretPosition make up the selection range)
-        clearBetween();
+        int selectFrom = Math.min(textPane.getCaretPosition(),textPane.getAnchor());
+        int selectTo = Math.max(textPane.getCaretPosition(),textPane.getAnchor());
+        textPane.deleteText(selectFrom, selectTo);
+        content.putString(text);
+        systemClipboard.setContent(content);
+        clipboardText = systemClipboard.getString();
+        onSearchTextChanged();
     }
 
-    void clearBetween() {
-        int caretPos = textPane.getCaretPosition();
-        textPane.deleteText(Math.min(textPane.getCaretPosition(),textPane.getAnchor()), Math.max(textPane.getCaretPosition(),textPane.getAnchor()));
-        onSearchTextChanged();
-        //to handle using CUT from the menu moving the caret back to 0
-        textPane.positionCaret(caretPos);
-    }
 
     public void copyText() {
-        setClipboardText(textPane.getSelectedText());
-    }
-
-    void setClipboardText(String clip) {
         ClipboardContent content = new ClipboardContent();
-        content.putString(clip);
+        content.putString(textPane.getSelectedText());
         systemClipboard.setContent(content);
-    }
-
-    String getClipboardText() {
-        return systemClipboard.getString();
+        clipboardText = systemClipboard.getString();
     }
 
     public void pasteText() {
         if (!systemClipboard.getString().isBlank()) {
-            insertText(systemClipboard.getString());
+            // fixing paste issue where the caret position keeps moving
+            int caretPos = textPane.getCaretPosition(); // storing the caret position
+            textPane.insertText(caretPos, systemClipboard.getString());
+            onSearchTextChanged(); // this function messes with the caret position
+            textPane.positionCaret(caretPos + systemClipboard.getString().length()); // resetting the caret position
         }
     }
-
-    void insertText(String insert) {
-        int caretPos = textPane.getCaretPosition(); // storing the caret position
-        textPane.insertText(caretPos, insert);
-        onSearchTextChanged(); // this function messes with the caret position
-        textPane.positionCaret(caretPos + insert.length());
-    }
-
 
     public void searchText() {
         searchBar.setManaged(true);
         searchBar.setVisible(true);
     }
 
-    void setSearchMatchesResult(String message) {
-        searchMatches.setText(message);
-    }
-
-    String getSearchMatchesResult() {
-        return searchMatches.getText();
-    }
-
     public void onSearchTextChanged() {
-        searchTextFor(searchField.getText());
-    }
-
-    public void searchTextFor(String searchedText) {
-
+        String searchedText = searchField.getText();
         // first, the text could be blank, so we deal with that issue first
         if (searchedText.isBlank()) {
             textPane.selectRange(0,0);
-            setSearchMatchesResult("No matches");
+            searchMatches.setText("No matches");
             return;
         }
 
@@ -294,12 +267,12 @@ public class EditorController {
             // select text to the first occurrence
             selectCount = 0;
             textPane.selectRange(selectFrom.get(selectCount), selectTo.get(selectCount));
-            setSearchMatchesResult((selectCount + 1) + " of " + searchCount + " matches");
+            searchMatches.setText((selectCount + 1) + " of " + searchCount + " matches");
         }
         else {
             // otherwise, we just set it to none found
             textPane.selectRange(0,0);
-            setSearchMatchesResult("No matches");
+            searchMatches.setText("No matches");
         }
     }
 
@@ -310,7 +283,7 @@ public class EditorController {
         }
         if (!selectFrom.isEmpty() && !selectTo.isEmpty()) {
             textPane.selectRange(selectFrom.get(selectCount), selectTo.get(selectCount));
-            setSearchMatchesResult((selectCount + 1) + " of " + searchCount + " matches");
+            searchMatches.setText((selectCount + 1) + " of " + searchCount + " matches");
         }
     }
 
@@ -321,7 +294,7 @@ public class EditorController {
         }
         if (!selectFrom.isEmpty() && !selectTo.isEmpty()) {
             textPane.selectRange(selectFrom.get(selectCount), selectTo.get(selectCount));
-            setSearchMatchesResult((selectCount + 1) + " of " + searchCount + " matches");
+            searchMatches.setText((selectCount + 1) + " of " + searchCount + " matches");
         }
     }
 

@@ -3,28 +3,30 @@ package com.c159251.a1.jtexteditor;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.KeyCode;
 import javafx.stage.Stage;
 
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import org.testfx.api.FxRobot;
+import org.testfx.assertions.api.Assertions;
 import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.framework.junit5.Start;
+import org.testfx.util.WaitForAsyncUtils;
 
 
 import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Path;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.testfx.api.FxAssert.verifyThat;
-import static org.testfx.matcher.control.LabeledMatchers.hasText;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(ApplicationExtension.class)
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class EditorLauncherTest {
 
     EditorController editorController;
+    Clipboard systemClipboard;
 
     @Start
     public void start(Stage primaryStage) throws Exception {
@@ -32,110 +34,99 @@ class EditorLauncherTest {
         Parent root = fxmlLoader.load();
         editorController = fxmlLoader.getController();
         editorController.initialize();
+        systemClipboard = Clipboard.getSystemClipboard();
         Scene primaryScene = new Scene(root, 720, 480);
         primaryStage.setTitle("Simple Text Editor");
         primaryStage.setScene(primaryScene);
         primaryStage.show();
     }
 
+    // ----------- load files tests ------------------------ //
 
     @Test
-    void canLoadFile() {
-        editorController.setSelectedFile(new File("src/test/java/com/c159251/a1/jtexteditor/basic_test.txt"));
-        assertEquals("basic_test.txt",editorController.getSelectedFileName());
-        assertEquals("Testing in JavaFX is testing me.\n", editorController.getTextFromTxtFile(new File("src/test/java/com/c159251/a1/jtexteditor/basic_test.txt")));
+    @Order(1)
+    void loadFromTxtFile() {
+        editorController.loadTextFromTxtFile(new File("src/test/resources/basic_test.txt"));
+        Assertions.assertThat(editorController.getTextPane()).hasText("Testing in JavaFX is testing me.\n");
     }
 
     @Test
-    void canLoadTextToPane() {
-        editorController.setSelectedFile(new File("src/test/java/com/c159251/a1/jtexteditor/basic_test.txt"));
-        editorController.loadTextFromTxtFile(editorController.getSelectedFile());
-        assertEquals("Testing in JavaFX is testing me.\n", editorController.getTextPane().getText());
+    @Order(2)
+    void loadFromPdfFile() {
+        editorController.loadTextFromPdfFile(new File("src/test/resources/basic_test.pdf"));
+        Assertions.assertThat(editorController.getTextPane()).hasText("Testing in JavaFX is testing me. \n");
+    }
+    @Test
+    @Order(3)
+    void loadFromOdtFile() {
+        editorController.loadTextFromOdtFile(new File("src/test/resources/basic_test.odt"));
+        Assertions.assertThat(editorController.getTextPane()).hasText("Testing in JavaFX is testing me.\n");
+    }
+
+    // ----------- clipboard cut/copy/paste tests ------------- //
+
+    @Test
+    @Order(4)
+    void copyText(FxRobot robot) {
+        editorController.loadTextFromTxtFile(new File("src/test/resources/basic_test.txt"));
+        editorController.getTextPane().selectRange(11, 17);
+        robot.clickOn("#copyBtn");
+        Assertions.assertThat(editorController.getClipboardText()).isEqualTo("JavaFX");
     }
 
     @Test
-    void canClearBetween() {
-        editorController.getTextPane().setText("This is a test string");
-        editorController.getTextPane().selectRange(0,4);
-        editorController.clearBetween();
-        assertEquals(" is a test string", editorController.getTextPane().getText());
-
+    @Order(5)
+    void cutText(FxRobot robot) {
+        editorController.loadTextFromTxtFile(new File("src/test/resources/basic_test.txt"));
+        editorController.getTextPane().selectRange(11, 17);
+        robot.clickOn("#cutBtn");
+        Assertions.assertThat(editorController.getTextPane()).hasText("Testing in  is testing me.\n");
+        Assertions.assertThat(editorController.getClipboardText()).isEqualTo("JavaFX");
     }
 
     @Test
-    void canInsertText() {
-        editorController.getTextPane().setText("This is a test string");
-        editorController.getTextPane().positionCaret(4);
-        editorController.insertText("INSERT");
-        assertEquals("ThisINSERT is a test string", editorController.getTextPane().getText());
+    @Order(6)
+    void copyAndPasteText(FxRobot robot) {
+        editorController.loadTextFromTxtFile(new File("src/test/resources/basic_test.txt"));
+        editorController.getTextPane().selectRange(11, 17);
+        robot.clickOn("#copyBtn");
+        WaitForAsyncUtils.waitForFxEvents();
+        Assertions.assertThat(editorController.getClipboardText()).isEqualTo("JavaFX");
+        robot.clickOn("#textPane");
+        editorController.getTextPane().positionCaret(17);
+        robot.clickOn("#pasteBtn");
+        Assertions.assertThat(editorController.getTextPane()).hasText("Testing in JavaFXJavaFX is testing me.\n");
     }
+
+    // ------------ searching text tests ---------------- //
 
     @Test
-    void searchBlanksCorrectReturn() {
-        editorController.getTextPane().clear();
-        editorController.searchTextFor("");
-        assertEquals("No matches",editorController.getSearchMatchesResult());
+    @Order(7)
+    void searchBlank(FxRobot robot) {
+        editorController.loadTextFromTxtFile(new File("src/test/resources/basic_test.txt"));
+        robot.clickOn("#searchBtn");
+        robot.clickOn("#searchField");
+        robot.write("Java");
+        robot.push(KeyCode.BACK_SPACE).push(KeyCode.BACK_SPACE).push(KeyCode.BACK_SPACE).push(KeyCode.BACK_SPACE);
+        Assertions.assertThat(editorController.getSearchMatchesLabel()).hasText("No matches");
     }
-
     @Test
-    void searchNoResults() {
-        editorController.getTextPane().setText("This is a test string");
-        editorController.searchTextFor("tset");
-        assertEquals("No matches",editorController.getSearchMatchesResult());
+    @Order(8)
+    void searchNoMatches(FxRobot robot) {
+        editorController.loadTextFromTxtFile(new File("src/test/resources/basic_test.txt"));
+        robot.clickOn("#searchBtn");
+        robot.clickOn("#searchField");
+        robot.write("JavaFex");
+        Assertions.assertThat(editorController.getSearchMatchesLabel()).hasText("No matches");
     }
-
- //This test fails because the search method uses multiple threads.
-//    @Test
-//    void search1Result() {
-//        editorController.getTextPane().setText("This is a test string");
-//        editorController.searchTextFor("string");
-//       // assertEquals("1 of 1 matches",editorController.getSearchMatchesResult());
-//    }
-//
-//}
-
     @Test
-    void saveToText() {
-
-        editorController.setSelectedFile(new File("src/test/java/com/c159251/a1/jtexteditor/testSave.txt"));
-        editorController.getTextPane().setText("Testing file");
-        editorController.saveTextToTxtFile(editorController.getSelectedFile());
-        File tempFile = new File("src/test/java/com/c159251/a1/jtexteditor/testSave.txt");
-        assertTrue(tempFile.exists());
-        //clean up
-        tempFile.delete();
-        assertFalse(tempFile.exists());
-
-
+    @Order(9)
+    void search1Matches(FxRobot robot) {
+        editorController.loadTextFromTxtFile(new File("src/test/resources/basic_test.txt"));
+        robot.clickOn("#searchBtn");
+        robot.clickOn("#searchField");
+        robot.write("JavaFX");
+        Assertions.assertThat(editorController.getSearchMatchesLabel()).hasText("1 of 1 matches");
     }
 
-    @Test
-    void saveToOdt() {
-
-        editorController.setSelectedFile(new File("src/test/java/com/c159251/a1/jtexteditor/testSave.odt"));
-        editorController.getTextPane().setText("Testing ODT file");
-        editorController.saveTextToOdtFile(editorController.getSelectedFile());
-        File tempFile = new File("src/test/java/com/c159251/a1/jtexteditor/testSave.odt");
-        assertTrue(tempFile.exists());
-        //clean up
-        tempFile.delete();
-        assertFalse(tempFile.exists());
-
-
-    }
-
-    @Test
-    void saveToPdf() {
-
-        editorController.setSelectedFile(new File("src/test/java/com/c159251/a1/jtexteditor/testSave.pdf"));
-        editorController.getTextPane().setText("Testing PDF file");
-        editorController.saveTextToOdtFile(editorController.getSelectedFile());
-        File tempFile = new File("src/test/java/com/c159251/a1/jtexteditor/testSave.pdf");
-        assertTrue(tempFile.exists());
-        //clean up
-        tempFile.delete();
-        assertFalse(tempFile.exists());
-
-
-    }
 }

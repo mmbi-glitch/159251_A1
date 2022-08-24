@@ -1,13 +1,16 @@
 package com.c159251.a1.jtexteditor;
 
-import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
-import javafx.scene.input.DataFormat;
+import javafx.scene.input.InputMethodEvent;
 import javafx.scene.layout.HBox;
 import javafx.stage.FileChooser;
+
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.odftoolkit.odfdom.doc.OdfTextDocument;
@@ -28,14 +31,20 @@ import java.io.*;
 
 /** This class is connected with the fxml config file and is responsible for the main program logic. **/
 
-public class EditorController {
 
-    @FXML
-    private Button searchForNextBtn;
+public class EditorController {
 
     private File selectedFile;
     private Clipboard systemClipboard;
-    private String clipboardText;
+
+    @FXML
+    private Label fileInfo;
+    @FXML
+    private Label wordCounts;
+    @FXML
+    private Label saveStatus;
+    @FXML
+    private Label timer;
     @FXML
     private MenuItem closeFile;
     @FXML
@@ -81,30 +90,16 @@ public class EditorController {
         searchBar.setVisible(false);
         selectFrom = new ArrayList<>();
         selectTo = new ArrayList<>();
-    }
-
-    // ---------------------------- getters ----------------------------------- //
-
-    public String getClipboardText() {
-        return clipboardText;
-    }
-
-    public TextArea getTextPane() {
-        return textPane;
-    }
-
-    public Label getSearchMatchesLabel() {
-        return searchMatches;
-    }
-
-    public TextField getSearchField() {
-        return searchField;
+        fileInfo.setText("NEW FILE");
+        wordCounts.setText("Words 0:0 Chars");
+        saveStatus.setText("Unsaved");
+        timer.setText("0:00:00");
     }
 
     // ---------------------------- FILE MENU close and open methods  --------------------------------------- /
 
     @FXML
-    public void onFileClose() {
+    protected void onFileClose() {
         System.exit(0);
     }
 
@@ -119,6 +114,9 @@ public class EditorController {
         fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
         selectedFile = fileChooser.showOpenDialog(null);
         if (selectedFile != null) {
+
+            fileInfo.setText(selectedFile.getName());
+
             if (selectedFile.getName().contains(".odt")) {
                 loadTextFromOdtFile(selectedFile);
                 return;
@@ -133,20 +131,20 @@ public class EditorController {
 
     // ---------------------------- 'loading text from file' methods --------------------------------------- /
 
-    public void loadTextFromPdfFile(File fileToLoad) {
+    protected void loadTextFromPdfFile(File fileToLoad) {
         try (PDDocument document = PDDocument.load(fileToLoad)) {
             PDFTextStripper extractor = new PDFTextStripper();
             String fileToText = extractor.getText(document);
             if (!fileToText.isBlank()) {
-//                textPane.setText(formatter.format(new Date()));
-                textPane.setText(fileToText);
+                textPane.setText(formatter.format(new Date()));
+                textPane.appendText("\n\n" + fileToText);
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public void loadTextFromOdtFile(File fileToLoad) {
+    protected void loadTextFromOdtFile(File fileToLoad) {
         try (OdfTextDocument document = OdfTextDocument.loadDocument(fileToLoad)) {
             OfficeTextElement root = document.getContentRoot();
             StringBuilder fileToText = new StringBuilder();
@@ -159,8 +157,8 @@ public class EditorController {
                 element = root.getFirstChildElement();
             }
             if (!fileToText.toString().isBlank()) {
-//                textPane.setText(formatter.format(new Date()));
-                textPane.setText(fileToText.toString());
+                textPane.setText(formatter.format(new Date()));
+                textPane.appendText("\n\n" + fileToText);
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -190,6 +188,10 @@ public class EditorController {
 
     }
 
+    // ---------------------------------------- STATUS BAR Updaters  --------------------------------------- /
+
+
+
     // ------------------------- EDIT MENU & BUTTON cut/copy/paste/search methods -------------------------- /
 
     public void cutText() {
@@ -201,7 +203,6 @@ public class EditorController {
         textPane.deleteText(selectFrom, selectTo);
         content.putString(text);
         systemClipboard.setContent(content);
-        clipboardText = systemClipboard.getString();
         onSearchTextChanged();
     }
 
@@ -210,7 +211,6 @@ public class EditorController {
         ClipboardContent content = new ClipboardContent();
         content.putString(textPane.getSelectedText());
         systemClipboard.setContent(content);
-        clipboardText = systemClipboard.getString();
     }
 
     public void pasteText() {
@@ -309,14 +309,6 @@ public class EditorController {
 
     // ---------------------------- FILE MENU save and save as methods ------------------------------------ /
 
-    File getSelectedFile() {
-        return this.selectedFile;
-    }
-
-    void setSelectedFile(File file) {
-        this.selectedFile = file;
-    }
-
     @FXML
     protected void onFileSave() {
         //if save is triggered with no stored file, then it should try as a 'save as'
@@ -402,4 +394,6 @@ public class EditorController {
             }
         }
     }
+
+
 }

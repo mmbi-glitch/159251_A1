@@ -22,6 +22,8 @@ public class EditorLauncher extends Application {
         primaryStage.setTitle("Simple Text Editor");
         primaryStage.setScene(primaryScene);
         primaryStage.show();
+
+
     }
 
     public static void main(String[] args) {

@@ -4,8 +4,13 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.InputMethodEvent;
 import javafx.scene.layout.HBox;
 import javafx.stage.FileChooser;
+
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.odftoolkit.odfdom.doc.OdfTextDocument;
@@ -26,10 +31,20 @@ import java.io.*;
 
 /** This class is connected with the fxml config file and is responsible for the main program logic. **/
 
+
 public class EditorController {
 
     private File selectedFile;
     private Clipboard systemClipboard;
+
+    @FXML
+    private Label fileInfo;
+    @FXML
+    private Label wordCounts;
+    @FXML
+    private Label saveStatus;
+    @FXML
+    private Label timer;
     @FXML
     private MenuItem closeFile;
     @FXML
@@ -75,6 +90,10 @@ public class EditorController {
         searchBar.setVisible(false);
         selectFrom = new ArrayList<>();
         selectTo = new ArrayList<>();
+        fileInfo.setText("NEW FILE");
+        wordCounts.setText("Words 0:0 Chars");
+        saveStatus.setText("Unsaved");
+        timer.setText("0:00:00");
     }
 
     // ---------------------------- FILE MENU close and open methods  --------------------------------------- /
@@ -95,6 +114,9 @@ public class EditorController {
         fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
         selectedFile = fileChooser.showOpenDialog(null);
         if (selectedFile != null) {
+
+            fileInfo.setText(selectedFile.getName());
+
             if (selectedFile.getName().contains(".odt")) {
                 loadTextFromOdtFile(selectedFile);
                 return;
@@ -165,6 +187,10 @@ public class EditorController {
         }
 
     }
+
+    // ---------------------------------------- STATUS BAR Updaters  --------------------------------------- /
+
+
 
     // ------------------------- EDIT MENU & BUTTON cut/copy/paste/search methods -------------------------- /
 
@@ -368,4 +394,6 @@ public class EditorController {
             }
         }
     }
+
+
 }

@@ -6,10 +6,6 @@ import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.layout.HBox;
 import javafx.stage.FileChooser;
-
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.odftoolkit.odfdom.doc.OdfTextDocument;
@@ -29,7 +25,6 @@ import java.util.Date;
 import java.io.*;
 
 /** This class is connected with the fxml config file and is responsible for the main program logic. **/
-
 
 public class EditorController {
 
@@ -453,4 +448,4 @@ public class EditorController {
             }
         }
     }
-
+}

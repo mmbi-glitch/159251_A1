@@ -93,19 +93,32 @@ public class EditorController {
                 new FileChooser.ExtensionFilter("PDF (*.pdf)", "*.pdf")
         );
         fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
-        selectedFile = fileChooser.showOpenDialog(null);
+        setSelectedFile(fileChooser.showOpenDialog(null));
         if (selectedFile != null) {
-            if (selectedFile.getName().contains(".odt")) {
+            if (getSelectedFileName().contains(".odt")) {
                 loadTextFromOdtFile(selectedFile);
                 return;
             }
-            if (selectedFile.getName().contains(".pdf")) {
+            if (getSelectedFileName().contains(".pdf")) {
                 loadTextFromPdfFile(selectedFile);
                 return;
             }
             loadTextFromTxtFile(selectedFile);
         }
     }
+
+    void setSelectedFile(File file) {
+        this.selectedFile = file;
+    }
+
+    File getSelectedFile() {
+        return selectedFile;
+    }
+
+    String getSelectedFileName() {
+        return this.selectedFile.getName();
+    }
+
 
     // ---------------------------- 'loading text from file' methods --------------------------------------- /
 
@@ -171,51 +184,80 @@ public class EditorController {
 
     }
 
+    //helper function, gets the whole text pane to use in testing functions
+    TextArea getTextPane() {
+        return this.textPane;
+    }
+
 
     // ------------------------- EDIT MENU & BUTTON cut/copy/paste/search methods -------------------------- /
 
+
     public void cutText() {
-        setClipBoardText(textPane.getSelectedText());
+        setClipboardText(textPane.getSelectedText());
         //fixing this particular action, it needs the anchor value (anchor and caretPosition make up the selection range)
+        clearBetween();
+    }
+
+    void clearBetween() {
+        int caretPos = textPane.getCaretPosition();
         textPane.deleteText(Math.min(textPane.getCaretPosition(),textPane.getAnchor()), Math.max(textPane.getCaretPosition(),textPane.getAnchor()));
         onSearchTextChanged();
+        //to handle using CUT from the menu moving the caret back to 0
+        textPane.positionCaret(caretPos);
     }
 
     public void copyText() {
-        setClipBoardText(textPane.getSelectedText());
+        setClipboardText(textPane.getSelectedText());
     }
 
-    void setClipBoardText(String clip) {
+    void setClipboardText(String clip) {
         ClipboardContent content = new ClipboardContent();
         content.putString(clip);
         systemClipboard.setContent(content);
     }
 
-    String getClipBoardText() {
+    String getClipboardText() {
         return systemClipboard.getString();
     }
 
     public void pasteText() {
         if (!systemClipboard.getString().isBlank()) {
-            // fixing paste issue where the caret position keeps moving
-            int caretPos = textPane.getCaretPosition(); // storing the caret position
-            textPane.insertText(caretPos, systemClipboard.getString());
-            onSearchTextChanged(); // this function messes with the caret position
-            textPane.positionCaret(caretPos + systemClipboard.getString().length()); // resetting the caret position
+            insertText(systemClipboard.getString());
         }
     }
+
+    void insertText(String insert) {
+        int caretPos = textPane.getCaretPosition(); // storing the caret position
+        textPane.insertText(caretPos, insert);
+        onSearchTextChanged(); // this function messes with the caret position
+        textPane.positionCaret(caretPos + insert.length());
+    }
+
 
     public void searchText() {
         searchBar.setManaged(true);
         searchBar.setVisible(true);
     }
 
+    void setSearchMatchesResult(String message) {
+        searchMatches.setText(message);
+    }
+
+    String getSearchMatchesResult() {
+        return searchMatches.getText();
+    }
+
     public void onSearchTextChanged() {
-        String searchedText = searchField.getText();
+        searchTextFor(searchField.getText());
+    }
+
+    public void searchTextFor(String searchedText) {
+
         // first, the text could be blank, so we deal with that issue first
         if (searchedText.isBlank()) {
             textPane.selectRange(0,0);
-            searchMatches.setText("No matches");
+            setSearchMatchesResult("No matches");
             return;
         }
 
@@ -252,12 +294,12 @@ public class EditorController {
             // select text to the first occurrence
             selectCount = 0;
             textPane.selectRange(selectFrom.get(selectCount), selectTo.get(selectCount));
-            searchMatches.setText((selectCount + 1) + " of " + searchCount + " matches");
+            setSearchMatchesResult((selectCount + 1) + " of " + searchCount + " matches");
         }
         else {
             // otherwise, we just set it to none found
             textPane.selectRange(0,0);
-            searchMatches.setText("No matches");
+            setSearchMatchesResult("No matches");
         }
     }
 
@@ -268,7 +310,7 @@ public class EditorController {
         }
         if (!selectFrom.isEmpty() && !selectTo.isEmpty()) {
             textPane.selectRange(selectFrom.get(selectCount), selectTo.get(selectCount));
-            searchMatches.setText((selectCount + 1) + " of " + searchCount + " matches");
+            setSearchMatchesResult((selectCount + 1) + " of " + searchCount + " matches");
         }
     }
 
@@ -279,7 +321,7 @@ public class EditorController {
         }
         if (!selectFrom.isEmpty() && !selectTo.isEmpty()) {
             textPane.selectRange(selectFrom.get(selectCount), selectTo.get(selectCount));
-            searchMatches.setText((selectCount + 1) + " of " + searchCount + " matches");
+            setSearchMatchesResult((selectCount + 1) + " of " + searchCount + " matches");
         }
     }
 

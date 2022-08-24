@@ -19,8 +19,6 @@ import org.testfx.util.WaitForAsyncUtils;
 
 import java.io.File;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 @ExtendWith(ApplicationExtension.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class EditorLauncherTest {
@@ -127,6 +125,29 @@ class EditorLauncherTest {
         robot.clickOn("#searchField");
         robot.write("JavaFX");
         Assertions.assertThat(editorController.getSearchMatchesLabel()).hasText("1 of 1 matches");
+    }
+
+    @Test
+    @Order(10)
+    void search2Matches(FxRobot robot) {
+        robot.clickOn("#textPane");
+        robot.write("Hello Hello how are you doing?");
+        robot.clickOn("#searchBtn");
+        robot.clickOn("#searchField");
+        robot.write("Hello");
+        Assertions.assertThat(editorController.getSearchMatchesLabel()).hasText("1 of 2 matches");
+    }
+
+    @Test
+    @Order(11)
+    void search2of2Matches(FxRobot robot) {
+        robot.clickOn("#textPane");
+        robot.write("Hello Hello how are you doing?");
+        robot.clickOn("#searchBtn");
+        robot.clickOn("#searchField");
+        robot.write("Hello");
+        robot.clickOn("#searchForNextBtn");
+        Assertions.assertThat(editorController.getSearchMatchesLabel()).hasText("2 of 2 matches");
     }
 
 }

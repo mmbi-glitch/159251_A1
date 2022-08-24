@@ -30,6 +30,9 @@ import java.io.*;
 
 public class EditorController {
 
+    @FXML
+    private Button searchForNextBtn;
+
     private File selectedFile;
     private Clipboard systemClipboard;
     private String clipboardText;
@@ -101,7 +104,7 @@ public class EditorController {
     // ---------------------------- FILE MENU close and open methods  --------------------------------------- /
 
     @FXML
-    protected void onFileClose() {
+    public void onFileClose() {
         System.exit(0);
     }
 
@@ -130,7 +133,7 @@ public class EditorController {
 
     // ---------------------------- 'loading text from file' methods --------------------------------------- /
 
-    protected void loadTextFromPdfFile(File fileToLoad) {
+    public void loadTextFromPdfFile(File fileToLoad) {
         try (PDDocument document = PDDocument.load(fileToLoad)) {
             PDFTextStripper extractor = new PDFTextStripper();
             String fileToText = extractor.getText(document);
@@ -143,7 +146,7 @@ public class EditorController {
         }
     }
 
-    protected void loadTextFromOdtFile(File fileToLoad) {
+    public void loadTextFromOdtFile(File fileToLoad) {
         try (OdfTextDocument document = OdfTextDocument.loadDocument(fileToLoad)) {
             OfficeTextElement root = document.getContentRoot();
             StringBuilder fileToText = new StringBuilder();

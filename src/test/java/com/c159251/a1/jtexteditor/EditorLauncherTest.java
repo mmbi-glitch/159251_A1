@@ -96,10 +96,8 @@ class EditorLauncherTest {
         WaitForAsyncUtils.waitForFxEvents();
         assertEquals(2, Stage.getWindows().size());
         // clean up afterwards
-        try {
-            Platform.runLater(() -> Stage.getWindows().get(Stage.getWindows().size() - 1).hide());
-        }
-        catch (Exception ignored) {}
+        try { Platform.runLater(() -> Stage.getWindows().get(Stage.getWindows().size() - 1).hide()); }
+        catch (Exception e) {e.printStackTrace();}
         WaitForAsyncUtils.waitForFxEvents();
     }
 
@@ -117,10 +115,8 @@ class EditorLauncherTest {
     void newWindowFrom2to1Instances(FxRobot robot) {
         robot.clickOn("#fileMenu");
         robot.clickOn("#newWindow");
-        try {
-            Platform.runLater(() -> Stage.getWindows().get(Stage.getWindows().size() - 1).requestFocus());
-        }
-        catch (Exception ignored) {}
+        try { Platform.runLater(() -> Stage.getWindows().get(Stage.getWindows().size() - 1).requestFocus()); }
+        catch (Exception e) {e.printStackTrace();}
         WaitForAsyncUtils.waitForFxEvents();
         robot.clickOn("#fileMenu");
         robot.clickOn("#closeFile");

@@ -9,6 +9,10 @@ import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DataFormat;
 import javafx.scene.layout.HBox;
 import javafx.stage.FileChooser;
+
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.odftoolkit.odfdom.doc.OdfTextDocument;
@@ -168,8 +172,8 @@ public class EditorController {
             PDFTextStripper extractor = new PDFTextStripper();
             String fileToText = extractor.getText(document);
             if (!fileToText.isBlank()) {
-//                textPane.setText(formatter.format(new Date()));
-                textPane.setText(fileToText);
+                textPane.setText(formatter.format(new Date()));
+                textPane.appendText("\n\n" + fileToText);
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -189,8 +193,8 @@ public class EditorController {
                 element = root.getFirstChildElement();
             }
             if (!fileToText.toString().isBlank()) {
-//                textPane.setText(formatter.format(new Date()));
-                textPane.setText(fileToText.toString());
+                textPane.setText(formatter.format(new Date()));
+                textPane.appendText("\n\n" + fileToText);
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -483,4 +487,6 @@ public class EditorController {
             }
         }
     }
+
+
 }

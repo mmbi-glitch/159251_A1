@@ -230,8 +230,8 @@ class EditorLauncherTest {
         File tempFile = new File("src/test/java/com/c159251/a1/jtexteditor/testSave.txt");
         assertTrue(tempFile.exists());
         //clean up
-        tempFile.delete();
-        assertFalse(tempFile.exists());
+        assertTrue(tempFile.delete());
+//        assertFalse(tempFile.exists());
 
 
     }
@@ -248,8 +248,8 @@ class EditorLauncherTest {
         File tempFile = new File("src/test/java/com/c159251/a1/jtexteditor/testSave.odt");
         assertTrue(tempFile.exists());
         //clean up
-        tempFile.delete();
-        assertFalse(tempFile.exists());
+        assertTrue(tempFile.delete());
+ //       assertFalse(tempFile.exists());
 
 
     }
@@ -265,8 +265,8 @@ class EditorLauncherTest {
         File tempFile = new File("src/test/java/com/c159251/a1/jtexteditor/testSave.pdf");
         assertTrue(tempFile.exists());
         //clean up
-        tempFile.delete();
-        assertFalse(tempFile.exists());
+        assertTrue(tempFile.delete());
+ //       assertFalse(tempFile.exists());
 
 
     }
@@ -303,6 +303,15 @@ class EditorLauncherTest {
     void testNewFileStatus() {
         assertEquals("NEW FILE", editorController.getFileInfo());
         assertTrue(editorController.getStatusInfo().contains("Created"));
+    }
+
+    @Test
+    @Order(16)
+    void testNewFileChangedStatus(FxRobot robot) {
+        robot.clickOn("#textPane");
+        robot.write("Hello");
+        assertEquals("NEW FILE", editorController.getFileInfo());
+        assertTrue(editorController.getStatusInfo().contains("Not Yet Saved"));
     }
 
 }

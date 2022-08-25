@@ -1,5 +1,6 @@
 package com.c159251.a1.jtexteditor;
 
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -47,20 +48,43 @@ class EditorLauncherTest {
     @Test
     @Order(1)
     void loadFromTxtFile() {
-        editorController.loadTextFromTxtFile(new File("src/test/resources/basic_test.txt"));
+
+        Platform.runLater( () -> {
+            try {
+                editorController.loadTextFromTxtFile(new File("src/test/resources/basic_test.txt"));
+            } catch (Exception ignored) {
+
+            }
+        });
+        WaitForAsyncUtils.waitForFxEvents();
         Assertions.assertThat(editorController.getTextPane()).hasText("Testing in JavaFX is testing me.\n");
     }
 
     @Test
     @Order(2)
     void loadFromPdfFile() {
-        editorController.loadTextFromPdfFile(new File("src/test/resources/basic_test.pdf"));
+        Platform.runLater( () -> {
+            try {
+                editorController.loadTextFromPdfFile(new File("src/test/resources/basic_test.pdf"));
+            } catch (Exception ignored) {
+
+            }
+        });
+        WaitForAsyncUtils.waitForFxEvents();
         Assertions.assertThat(editorController.getTextPane()).hasText("Testing in JavaFX is testing me. \n");
     }
+
     @Test
     @Order(3)
     void loadFromOdtFile() {
-        editorController.loadTextFromOdtFile(new File("src/test/resources/basic_test.odt"));
+        Platform.runLater( () -> {
+            try {
+                editorController.loadTextFromOdtFile(new File("src/test/resources/basic_test.odt"));
+            } catch (Exception ignored) {
+
+            }
+        });
+        WaitForAsyncUtils.waitForFxEvents();
         Assertions.assertThat(editorController.getTextPane()).hasText("Testing in JavaFX is testing me.\n");
     }
 
@@ -69,7 +93,14 @@ class EditorLauncherTest {
     @Test
     @Order(4)
     void copyText(FxRobot robot) {
-        editorController.loadTextFromTxtFile(new File("src/test/resources/basic_test.txt"));
+        Platform.runLater( () -> {
+            try {
+                editorController.loadTextFromTxtFile(new File("src/test/resources/basic_test.txt"));
+            } catch (Exception ignored) {
+
+            }
+        });
+        WaitForAsyncUtils.waitForFxEvents();
         editorController.getTextPane().selectRange(11, 17);
         robot.clickOn("#copyBtn");
         Assertions.assertThat(editorController.getClipboardText()).isEqualTo("JavaFX");
@@ -78,7 +109,14 @@ class EditorLauncherTest {
     @Test
     @Order(5)
     void cutText(FxRobot robot) {
-        editorController.loadTextFromTxtFile(new File("src/test/resources/basic_test.txt"));
+        Platform.runLater( () -> {
+            try {
+                editorController.loadTextFromTxtFile(new File("src/test/resources/basic_test.txt"));
+            } catch (Exception ignored) {
+
+            }
+        });
+        WaitForAsyncUtils.waitForFxEvents();
         editorController.getTextPane().selectRange(11, 17);
         robot.clickOn("#cutBtn");
         Assertions.assertThat(editorController.getTextPane()).hasText("Testing in  is testing me.\n");
@@ -88,7 +126,14 @@ class EditorLauncherTest {
     @Test
     @Order(6)
     void copyAndPasteText(FxRobot robot) {
-        editorController.loadTextFromTxtFile(new File("src/test/resources/basic_test.txt"));
+        Platform.runLater( () -> {
+            try {
+                editorController.loadTextFromTxtFile(new File("src/test/resources/basic_test.txt"));
+            } catch (Exception ignored) {
+
+            }
+        });
+        WaitForAsyncUtils.waitForFxEvents();
         editorController.getTextPane().selectRange(11, 17);
         robot.clickOn("#copyBtn");
         WaitForAsyncUtils.waitForFxEvents();
@@ -104,7 +149,14 @@ class EditorLauncherTest {
     @Test
     @Order(7)
     void searchBlank(FxRobot robot) {
-        editorController.loadTextFromTxtFile(new File("src/test/resources/basic_test.txt"));
+        Platform.runLater( () -> {
+            try {
+                editorController.loadTextFromTxtFile(new File("src/test/resources/basic_test.txt"));
+            } catch (Exception ignored) {
+
+            }
+        });
+        WaitForAsyncUtils.waitForFxEvents();
         robot.clickOn("#searchBtn");
         robot.clickOn("#searchField");
         robot.write("Java");
@@ -114,7 +166,14 @@ class EditorLauncherTest {
     @Test
     @Order(8)
     void searchNoMatches(FxRobot robot) {
-        editorController.loadTextFromTxtFile(new File("src/test/resources/basic_test.txt"));
+        Platform.runLater( () -> {
+            try {
+                editorController.loadTextFromTxtFile(new File("src/test/resources/basic_test.txt"));
+            } catch (Exception ignored) {
+
+            }
+        });
+        WaitForAsyncUtils.waitForFxEvents();
         robot.clickOn("#searchBtn");
         robot.clickOn("#searchField");
         robot.write("JavaFex");
@@ -123,7 +182,14 @@ class EditorLauncherTest {
     @Test
     @Order(9)
     void search1Matches(FxRobot robot) {
-        editorController.loadTextFromTxtFile(new File("src/test/resources/basic_test.txt"));
+        Platform.runLater( () -> {
+            try {
+                editorController.loadTextFromTxtFile(new File("src/test/resources/basic_test.txt"));
+            } catch (Exception ignored) {
+
+            }
+        });
+        WaitForAsyncUtils.waitForFxEvents();
         robot.clickOn("#searchBtn");
         robot.clickOn("#searchField");
         robot.write("JavaFX");
@@ -208,10 +274,27 @@ class EditorLauncherTest {
     @Test
     @Order(15)
     void testWordCount() {
-        editorController.getTextPane().setText("Testing PDF file");
+
+        Platform.runLater( () -> {
+            try {
+                editorController.getTextPane().setText("Testing PDF file");
+            } catch (Exception ignored) {
+
+            }
+        });
+        WaitForAsyncUtils.waitForFxEvents();
         assertEquals(editorController.countWords(),"Words 3:16 Chars");
-        editorController.getTextPane().setText("Horse horse horse horse");
-        assertEquals(editorController.countWords(),"Words 4:23 Chars");
+
+        Platform.runLater( () -> {
+            try {
+                editorController.getTextPane().setText("Testing PDF file Again");
+            } catch (Exception ignored) {
+
+            }
+        });
+        WaitForAsyncUtils.waitForFxEvents();
+        assertEquals(editorController.countWords(),"Words 4:22 Chars");
+
 
     }
 

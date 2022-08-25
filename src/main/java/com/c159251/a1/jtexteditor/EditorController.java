@@ -8,6 +8,8 @@ import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DataFormat;
 import javafx.scene.layout.HBox;
 import javafx.stage.FileChooser;
+import javafx.stage.Stage;
+import javafx.stage.Window;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.odftoolkit.odfdom.doc.OdfTextDocument;
@@ -25,11 +27,14 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import java.io.*;
+import java.util.Optional;
 
 /** This class is connected with the fxml config file and is responsible for the main program logic. **/
 
 public class EditorController {
 
+    @FXML
+    private Menu fileMenu;
     @FXML
     private Button searchForNextBtn;
 
@@ -65,12 +70,14 @@ public class EditorController {
 
     private int searchCount;
     private int selectCount;
-    ArrayList<Integer> selectFrom;
-    ArrayList<Integer> selectTo;
+    private ArrayList<Integer> selectFrom;
+    private ArrayList<Integer> selectTo;
+
+    private static Dialog<ButtonType> saveDialog;
+    private static ButtonType yesBtn, noBtn;
 
 
     // ---------------------------- initializing method --------------------------------------- /
-    @FXML
     public void initialize() {
         systemClipboard = Clipboard.getSystemClipboard();
         // append date and time to text pane
@@ -81,12 +88,22 @@ public class EditorController {
         searchBar.setVisible(false);
         selectFrom = new ArrayList<>();
         selectTo = new ArrayList<>();
+        // init save dialog stuff
+        saveDialog = new Dialog<>();
+        yesBtn = ButtonType.YES;
+        noBtn = ButtonType.NO;
+        saveDialog.getDialogPane().getButtonTypes().addAll(yesBtn, noBtn);
+        saveDialog.setContentText("Any unsaved changes will be lost. Do you wish to continue?");
     }
 
     // ---------------------------- getters ----------------------------------- //
 
     public String getClipboardText() {
         return clipboardText;
+    }
+
+    public Menu getFileMenu() {
+        return fileMenu;
     }
 
     public TextArea getTextPane() {
@@ -101,14 +118,44 @@ public class EditorController {
         return searchField;
     }
 
-    // ---------------------------- FILE MENU close and open methods  --------------------------------------- /
-
-    @FXML
-    public void onFileClose() {
-        System.exit(0);
+    public Dialog<ButtonType> getSaveDialog() {
+        return saveDialog;
     }
 
-    @FXML
+
+
+    public MenuItem getCloseFile() {
+        return closeFile;
+    }
+
+    public javafx.scene.Node getYesBtn() {
+        if (saveDialog.getDialogPane() != null) {
+            return saveDialog.getDialogPane().lookupButton(ButtonType.YES);
+        }
+        return null;
+    }
+
+    public javafx.scene.Node getNoBtn() {
+        if (saveDialog.getDialogPane() != null) {
+            return saveDialog.getDialogPane().lookupButton(ButtonType.NO);
+        }
+        return null;
+    }
+
+    // ---------------------------- FILE MENU close and open methods  --------------------------------------- /
+
+    public void onFileClose() {
+        saveDialog.setTitle("Save Before Closing");
+        Optional<ButtonType> result = saveDialog.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.YES) {
+            saveDialog.close();
+            Stage.getWindows().get(Stage.getWindows().size() - 1).hide();
+        }
+        else {
+            saveDialog.close();
+        }
+    }
+
     public void onFileOpen() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().addAll(
@@ -168,7 +215,7 @@ public class EditorController {
     }
 
 
-    protected void loadTextFromTxtFile(File fileToLoad) {
+    public void loadTextFromTxtFile(File fileToLoad) {
         StringBuilder fileToText;
         // load text in file using a buffered file reader
         try (BufferedReader fileReader = new BufferedReader(new FileReader(fileToLoad))) {
@@ -186,6 +233,31 @@ public class EditorController {
         }
         catch (IOException e) {
             e.printStackTrace();
+        }
+
+    }
+
+    // ------------------------- FILE MENU new and new window methods -------------------------------------- //
+
+    // this should clear the text in the text area
+    public void onFileNew() {
+        saveDialog.setTitle("Save Before Clearing");
+        Optional<ButtonType> result = saveDialog.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.YES) {
+            textPane.clear();
+            saveDialog.close();
+        }
+        else {
+            saveDialog.close();
+        }
+    }
+
+    // this should open a new program window
+    public void onFileNewWindow() {
+        try {
+            new EditorLauncher().start(new Stage());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
 
     }
@@ -309,16 +381,15 @@ public class EditorController {
 
     // ---------------------------- FILE MENU save and save as methods ------------------------------------ /
 
-    File getSelectedFile() {
+    public File getSelectedFile() {
         return this.selectedFile;
     }
 
-    void setSelectedFile(File file) {
+    public void setSelectedFile(File file) {
         this.selectedFile = file;
     }
 
-    @FXML
-    protected void onFileSave() {
+    public void onFileSave() {
         //if save is triggered with no stored file, then it should try as a 'save as'
         if (selectedFile == null) {
             onFileSaveAs();
@@ -331,8 +402,7 @@ public class EditorController {
         saveTextToTxtFile(selectedFile);
     }
 
-    @FXML
-    protected void onFileSaveAs() {
+    public void onFileSaveAs() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter("Plain Text (*.txt)", "*.txt"),

@@ -21,8 +21,10 @@
             <children>
                 <MenuBar>
                     <menus>
-                        <Menu mnemonicParsing="false" text="File">
+                        <Menu fx:id="fileMenu" mnemonicParsing="false" text="File">
                             <items>
+                                <MenuItem fx:id="newFile" mnemonicParsing="false" onAction="#onFileNew" text="New" />
+                                <MenuItem fx:id="newWindow" mnemonicParsing="false" onAction="#onFileNewWindow" text="New Window" />
                                 <MenuItem fx:id="openFile" mnemonicParsing="false" onAction="#onFileOpen" text="Open" />
                                 <MenuItem fx:id="saveFile" mnemonicParsing="false" onAction="#onFileSave" text="Save" />
                                 <MenuItem fx:id="saveFileAs" mnemonicParsing="false" onAction="#onFileSaveAs" text="Save As" />
@@ -88,7 +90,7 @@
                         <FontIcon iconLiteral="fas-chevron-up" iconSize="16" />
                      </graphic>
                   </Button>
-                  <Button mnemonicParsing="false" onAction="#searchForNext" fx:id="searchForNextBtn">
+                  <Button fx:id="searchForNextBtn" mnemonicParsing="false" onAction="#searchForNext">
                      <graphic>
                         <FontIcon iconLiteral="fas-chevron-down" iconSize="16" />
                      </graphic>

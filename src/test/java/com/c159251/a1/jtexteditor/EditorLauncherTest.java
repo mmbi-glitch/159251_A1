@@ -1,10 +1,12 @@
 package com.c159251.a1.jtexteditor;
 
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.MouseButton;
 import javafx.stage.Stage;
 
 import org.junit.jupiter.api.*;
@@ -14,13 +16,13 @@ import org.testfx.api.FxRobot;
 import org.testfx.assertions.api.Assertions;
 import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.framework.junit5.Start;
+import org.testfx.service.query.PointQuery;
 import org.testfx.util.WaitForAsyncUtils;
 
 
 import java.io.File;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(ApplicationExtension.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -64,10 +66,75 @@ class EditorLauncherTest {
         Assertions.assertThat(editorController.getTextPane()).hasText("Testing in JavaFX is testing me.\n");
     }
 
-    // ----------- clipboard cut/copy/paste tests ------------- //
+    // -------------------- new file and new window tests --------------------------- //
 
     @Test
     @Order(4)
+    void newFile(FxRobot robot) {
+        editorController.loadTextFromPdfFile(new File("src/test/resources/basic_test.pdf"));
+        robot.clickOn("#fileMenu");
+        robot.clickOn("#newFile");
+        robot.clickOn(editorController.getYesBtn());
+        Assertions.assertThat(editorController.getTextPane().getText()).isEqualTo("");
+    }
+
+    @Test
+    @Order(5)
+    void newFileNoClear(FxRobot robot) {
+        editorController.loadTextFromPdfFile(new File("src/test/resources/basic_test.pdf"));
+        robot.clickOn("#fileMenu");
+        robot.clickOn("#newFile");
+        robot.clickOn(editorController.getNoBtn());
+        Assertions.assertThat(editorController.getTextPane().getText()).isNotBlank();
+    }
+
+    @Test
+    @Order(6)
+    void newWindowFrom1to2Instances(FxRobot robot) {
+        robot.clickOn("#fileMenu");
+        robot.clickOn("#newWindow");
+        WaitForAsyncUtils.waitForFxEvents();
+        assertEquals(2, Stage.getWindows().size());
+        // clean up afterwards
+        try {
+            Platform.runLater(() -> Stage.getWindows().get(Stage.getWindows().size() - 1).hide());
+        }
+        catch (Exception ignored) {}
+        WaitForAsyncUtils.waitForFxEvents();
+    }
+
+    @Test
+    @Order(7)
+    void newWindowFrom1to0Instances(FxRobot robot) {
+        robot.clickOn("#fileMenu");
+        robot.clickOn("#closeFile");
+        robot.clickOn(editorController.getYesBtn());
+        assertEquals(0, Stage.getWindows().size());
+    }
+
+    @Test
+    @Order(8)
+    void newWindowFrom2to1Instances(FxRobot robot) {
+        robot.clickOn("#fileMenu");
+        robot.clickOn("#newWindow");
+        WaitForAsyncUtils.waitForFxEvents();
+        try {
+            Platform.runLater(() -> editorController.getFileMenu().show());
+        }
+        catch (Exception ignored) {}
+        WaitForAsyncUtils.waitForFxEvents();
+        robot.clickOn("#closeFile", MouseButton.PRIMARY);
+        editorController.getFileMenu().hide();
+        WaitForAsyncUtils.waitForFxEvents();
+        robot.clickOn(editorController.getYesBtn());
+        WaitForAsyncUtils.waitForFxEvents();
+        assertEquals(1, Stage.getWindows().size());
+    }
+
+    // ----------- clipboard cut/copy/paste tests ------------- //
+
+    @Test
+    @Order(9)
     void copyText(FxRobot robot) {
         editorController.loadTextFromTxtFile(new File("src/test/resources/basic_test.txt"));
         editorController.getTextPane().selectRange(11, 17);
@@ -76,7 +143,7 @@ class EditorLauncherTest {
     }
 
     @Test
-    @Order(5)
+    @Order(10)
     void cutText(FxRobot robot) {
         editorController.loadTextFromTxtFile(new File("src/test/resources/basic_test.txt"));
         editorController.getTextPane().selectRange(11, 17);
@@ -86,7 +153,7 @@ class EditorLauncherTest {
     }
 
     @Test
-    @Order(6)
+    @Order(11)
     void copyAndPasteText(FxRobot robot) {
         editorController.loadTextFromTxtFile(new File("src/test/resources/basic_test.txt"));
         editorController.getTextPane().selectRange(11, 17);
@@ -102,7 +169,7 @@ class EditorLauncherTest {
     // ------------ searching text tests ---------------- //
 
     @Test
-    @Order(7)
+    @Order(12)
     void searchBlank(FxRobot robot) {
         editorController.loadTextFromTxtFile(new File("src/test/resources/basic_test.txt"));
         robot.clickOn("#searchBtn");
@@ -112,7 +179,7 @@ class EditorLauncherTest {
         Assertions.assertThat(editorController.getSearchMatchesLabel()).hasText("No matches");
     }
     @Test
-    @Order(8)
+    @Order(13)
     void searchNoMatches(FxRobot robot) {
         editorController.loadTextFromTxtFile(new File("src/test/resources/basic_test.txt"));
         robot.clickOn("#searchBtn");
@@ -121,7 +188,7 @@ class EditorLauncherTest {
         Assertions.assertThat(editorController.getSearchMatchesLabel()).hasText("No matches");
     }
     @Test
-    @Order(9)
+    @Order(14)
     void search1Matches(FxRobot robot) {
         editorController.loadTextFromTxtFile(new File("src/test/resources/basic_test.txt"));
         robot.clickOn("#searchBtn");
@@ -131,7 +198,7 @@ class EditorLauncherTest {
     }
 
     @Test
-    @Order(10)
+    @Order(15)
     void search2Matches(FxRobot robot) {
         robot.clickOn("#textPane");
         robot.write("Hello Hello how are you doing?");
@@ -142,7 +209,7 @@ class EditorLauncherTest {
     }
 
     @Test
-    @Order(11)
+    @Order(16)
     void search2of2Matches(FxRobot robot) {
         robot.clickOn("#textPane");
         robot.write("Hello Hello how are you doing?");
@@ -153,48 +220,44 @@ class EditorLauncherTest {
         Assertions.assertThat(editorController.getSearchMatchesLabel()).hasText("2 of 2 matches");
     }
 
-    @Test
-    void saveToText() {
+    // ----------------------------------- saving files tests ------------------------ //
 
-        editorController.setSelectedFile(new File("src/test/java/com/c159251/a1/jtexteditor/testSave.txt"));
+    @Test
+    @Order(17)
+    void saveToText() {
+        editorController.setSelectedFile(new File("src/test/resources/testSave.txt"));
         editorController.getTextPane().setText("Testing file");
         editorController.saveTextToTxtFile(editorController.getSelectedFile());
-        File tempFile = new File("src/test/java/com/c159251/a1/jtexteditor/testSave.txt");
+        File tempFile = new File("src/test/resources/testSave.txt");
         assertTrue(tempFile.exists());
         //clean up
         tempFile.delete();
         assertFalse(tempFile.exists());
-
-
     }
 
     @Test
+    @Order(18)
     void saveToOdt() {
-
-        editorController.setSelectedFile(new File("src/test/java/com/c159251/a1/jtexteditor/testSave.odt"));
+        editorController.setSelectedFile(new File("src/test/resources/testSave.odt"));
         editorController.getTextPane().setText("Testing ODT file");
         editorController.saveTextToOdtFile(editorController.getSelectedFile());
-        File tempFile = new File("src/test/java/com/c159251/a1/jtexteditor/testSave.odt");
+        File tempFile = new File("src/test/resources/testSave.odt");
         assertTrue(tempFile.exists());
         //clean up
         tempFile.delete();
         assertFalse(tempFile.exists());
-
-
     }
 
     @Test
+    @Order(19)
     void saveToPdf() {
-
-        editorController.setSelectedFile(new File("src/test/java/com/c159251/a1/jtexteditor/testSave.pdf"));
+        editorController.setSelectedFile(new File("src/test/resources/testSave.pdf"));
         editorController.getTextPane().setText("Testing PDF file");
-        editorController.saveTextToOdtFile(editorController.getSelectedFile());
-        File tempFile = new File("src/test/java/com/c159251/a1/jtexteditor/testSave.pdf");
+        editorController.saveTextToPdfFile(editorController.getSelectedFile());
+        File tempFile = new File("src/test/resources/testSave.pdf");
         assertTrue(tempFile.exists());
         //clean up
         tempFile.delete();
         assertFalse(tempFile.exists());
-
-
     }
 }

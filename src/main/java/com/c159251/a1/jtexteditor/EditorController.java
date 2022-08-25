@@ -1,13 +1,18 @@
 package com.c159251.a1.jtexteditor;
 
-import javafx.application.Platform;
+import javafx.animation.Animation;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
-import javafx.scene.input.DataFormat;
 import javafx.scene.layout.HBox;
 import javafx.stage.FileChooser;
+
+import javafx.util.Duration;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.odftoolkit.odfdom.doc.OdfTextDocument;
@@ -25,6 +30,8 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import java.io.*;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /** This class is connected with the fxml config file and is responsible for the main program logic. **/
 
@@ -36,6 +43,18 @@ public class EditorController {
     private File selectedFile;
     private Clipboard systemClipboard;
     private String clipboardText;
+    private int elapsedSeconds;
+    private Boolean changesMade;
+    private Date saveTime;
+
+    @FXML
+    private Label fileInfo;
+    @FXML
+    private Label wordCounts;
+    @FXML
+    private Label saveStatus;
+    @FXML
+    private Label timer;
     @FXML
     private MenuItem closeFile;
     @FXML
@@ -61,12 +80,17 @@ public class EditorController {
     @FXML
     private Label searchMatches;
 
-    private SimpleDateFormat formatter;
+    private SimpleDateFormat dateformatter;
 
     private int searchCount;
     private int selectCount;
     ArrayList<Integer> selectFrom;
     ArrayList<Integer> selectTo;
+
+    Timeline secondsTimer = new Timeline(new KeyFrame(
+            Duration.millis(1000),
+            ae -> setTimerText()));
+
 
 
     // ---------------------------- initializing method --------------------------------------- /
@@ -74,13 +98,27 @@ public class EditorController {
     public void initialize() {
         systemClipboard = Clipboard.getSystemClipboard();
         // append date and time to text pane
-        formatter = new SimpleDateFormat("HH:mm dd/MM/yyyy");
-        textPane.setText(formatter.format(new Date()));
+        dateformatter = new SimpleDateFormat("HH:mm dd/MM/yyyy");
+        textPane.setText(dateformatter.format(new Date()));
         textPane.appendText("\n\n");
         searchBar.setManaged(false);
         searchBar.setVisible(false);
         selectFrom = new ArrayList<>();
         selectTo = new ArrayList<>();
+        fileInfo.setText("NEW FILE");
+        wordCounts.setText("Words 0:0 Chars");
+        timer.setText("00:00:00");
+        secondsTimer.setCycleCount(Animation.INDEFINITE);
+        secondsTimer.play();
+        setNewStatus();
+        //set up listener for textbox changes
+        textPane.textProperty().addListener(new ChangeListener<String>() {
+            @Override
+            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+                setChangedStatus();
+                setWordCountLabel();
+            }
+        });
     }
 
     // ---------------------------- getters ----------------------------------- //
@@ -101,10 +139,23 @@ public class EditorController {
         return searchField;
     }
 
+    public String getFileInfo() {
+        return fileInfo.getText();
+    }
+
+    public String getStatusInfo() {
+        return saveStatus.getText();
+    }
+
+    public Animation.Status getTimerRunning() {
+        return secondsTimer.getStatus();
+    }
+
+
     // ---------------------------- FILE MENU close and open methods  --------------------------------------- /
 
     @FXML
-    public void onFileClose() {
+    protected void onFileClose() {
         System.exit(0);
     }
 
@@ -119,21 +170,26 @@ public class EditorController {
         fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
         selectedFile = fileChooser.showOpenDialog(null);
         if (selectedFile != null) {
+            fileInfo.setText(selectedFile.getName());
+
             if (selectedFile.getName().contains(".odt")) {
                 loadTextFromOdtFile(selectedFile);
+                setOpenStatus();
                 return;
             }
             if (selectedFile.getName().contains(".pdf")) {
                 loadTextFromPdfFile(selectedFile);
+                setOpenStatus();
                 return;
             }
             loadTextFromTxtFile(selectedFile);
+            setOpenStatus();
         }
     }
 
     // ---------------------------- 'loading text from file' methods --------------------------------------- /
 
-    public void loadTextFromPdfFile(File fileToLoad) {
+    protected void loadTextFromPdfFile(File fileToLoad) {
         try (PDDocument document = PDDocument.load(fileToLoad)) {
             PDFTextStripper extractor = new PDFTextStripper();
             String fileToText = extractor.getText(document);
@@ -146,7 +202,7 @@ public class EditorController {
         }
     }
 
-    public void loadTextFromOdtFile(File fileToLoad) {
+    protected void loadTextFromOdtFile(File fileToLoad) {
         try (OdfTextDocument document = OdfTextDocument.loadDocument(fileToLoad)) {
             OfficeTextElement root = document.getContentRoot();
             StringBuilder fileToText = new StringBuilder();
@@ -188,6 +244,56 @@ public class EditorController {
             e.printStackTrace();
         }
 
+    }
+
+    // ---------------------------------------- STATUS BAR Updaters  --------------------------------------- /
+
+
+    //setChangesMade sets a flag to show changes have been made, and closing without saving will lose changes
+    void setChangedStatus() {
+        this.changesMade = true;
+
+        if(selectedFile == null){
+            this.saveStatus.setText("Not Yet Saved - created " + dateformatter.format(saveTime));
+        } else {
+            this.saveStatus.setText("Unsaved Changes - last saved " + dateformatter.format(saveTime));
+        }
+
+    }
+
+    //sets the text on the timer from window open
+    void setTimerText() {
+        elapsedSeconds += 1;
+        timer.setText(String.format("%02d:%02d:%02d",(elapsedSeconds/3600),(elapsedSeconds % 3600) / 60,elapsedSeconds % 60));
+    }
+
+    //sets flag to show that no changes have been made, and it is safe to close without losing work
+    void setSavedStatus () {
+        setUnchangedFlags();
+        this.saveStatus.setText("Saved at " + dateformatter.format(saveTime));
+    }
+
+    void setNewStatus () {
+        setUnchangedFlags();
+        this.saveStatus.setText("Created at " + dateformatter.format(saveTime));
+    }
+
+    void setOpenStatus () {
+        setUnchangedFlags();
+        this.saveStatus.setText("Opened at " + dateformatter.format(saveTime));
+    }
+
+    void setUnchangedFlags() {
+        this.saveTime = new Date();
+        this.changesMade = false;
+    }
+
+    void setWordCountLabel() {
+        wordCounts.setText(countWords());
+    }
+
+    String countWords() {
+        return "Words " + textPane.getText().split(" ").length + ":" + textPane.getText().length() + " Chars";
     }
 
     // ------------------------- EDIT MENU & BUTTON cut/copy/paste/search methods -------------------------- /
@@ -320,19 +426,23 @@ public class EditorController {
     @FXML
     protected void onFileSave() {
         //if save is triggered with no stored file, then it should try as a 'save as'
+
         if (selectedFile == null) {
             onFileSaveAs();
             return;
         }
         if (selectedFile.getName().contains(".odt")) {
             saveTextToOdtFile(selectedFile);
+            setSavedStatus();
             return;
         }
+        setSavedStatus();
         saveTextToTxtFile(selectedFile);
     }
 
     @FXML
     protected void onFileSaveAs() {
+
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter("Plain Text (*.txt)", "*.txt"),
@@ -348,13 +458,16 @@ public class EditorController {
         if (selectedFile != null) {
             if (selectedFile.getName().contains(".odt")) {
                 saveTextToOdtFile(selectedFile);
+                setSavedStatus();
                 return;
             }
             if (selectedFile.getName().contains(".pdf")) {
                 saveTextToPdfFile(selectedFile);
+                setSavedStatus();
                 return;
             }
             saveTextToTxtFile(selectedFile);
+            setSavedStatus();
         }
     }
 
@@ -402,4 +515,6 @@ public class EditorController {
             }
         }
     }
+
+
 }

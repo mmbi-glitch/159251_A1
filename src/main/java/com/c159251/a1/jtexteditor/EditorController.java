@@ -38,6 +38,8 @@ import java.util.TimerTask;
 public class EditorController {
 
     @FXML
+    public Button timeStampBtn;
+    @FXML
     private Button searchForNextBtn;
 
     private File selectedFile;
@@ -80,7 +82,7 @@ public class EditorController {
     @FXML
     private Label searchMatches;
 
-    private SimpleDateFormat dateformatter;
+    private final SimpleDateFormat dateformatter  = new SimpleDateFormat("HH:mm dd/MM/yyyy");
 
     private int searchCount;
     private int selectCount;
@@ -97,10 +99,8 @@ public class EditorController {
     @FXML
     public void initialize() {
         systemClipboard = Clipboard.getSystemClipboard();
-        // append date and time to text pane
-        dateformatter = new SimpleDateFormat("HH:mm dd/MM/yyyy");
-        textPane.setText(dateformatter.format(new Date()));
-        textPane.appendText("\n\n");
+        // append date and time to text pane moved to a function
+
         searchBar.setManaged(false);
         searchBar.setVisible(false);
         selectFrom = new ArrayList<>();
@@ -112,12 +112,9 @@ public class EditorController {
         secondsTimer.play();
         setNewStatus();
         //set up listener for textbox changes
-        textPane.textProperty().addListener(new ChangeListener<String>() {
-            @Override
-            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-                setChangedStatus();
-                setWordCountLabel();
-            }
+        textPane.textProperty().addListener((observable, oldValue, newValue) -> {
+            setChangedStatus();
+            setWordCountLabel();
         });
     }
 
@@ -296,7 +293,15 @@ public class EditorController {
         return "Words " + textPane.getText().split(" ").length + ":" + textPane.getText().length() + " Chars";
     }
 
-    // ------------------------- EDIT MENU & BUTTON cut/copy/paste/search methods -------------------------- /
+    // ------------------------- EDIT MENU & BUTTON cut/copy/paste/search/datetime methods -------------------------- /
+
+    public void addTimeStamp() {
+
+       // textPane.setText(dateformatter.format(new Date()));
+        textPane.setText(dateformatter.format(new Date()) + "\n\n" + textPane.getText());
+
+
+    }
 
     public void cutText() {
         ClipboardContent content = new ClipboardContent();
@@ -347,7 +352,7 @@ public class EditorController {
 
         // init vars here
         searchCount = 0;
-        int searchFrom = 0;
+        int searchFrom; //removed the initialisation on intelliJ recommendation
         int searchTo = textPane.getText().length();
         selectFrom.clear();
         selectTo.clear();

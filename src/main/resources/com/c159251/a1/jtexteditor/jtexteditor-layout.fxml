@@ -25,6 +25,7 @@
                                 <MenuItem fx:id="menuCut" mnemonicParsing="false" onAction="#cutText" text="Cut" />
                                 <MenuItem fx:id="menuCopy" mnemonicParsing="false" onAction="#copyText" text="Copy" />
                                 <MenuItem fx:id="menuPaste" mnemonicParsing="false" onAction="#pasteText" text="Paste" />
+                                <MenuItem fx:id="menuTimeStamp" mnemonicParsing="false" onAction="#addTimeStamp" text="Add Timestamp" />
                                 <MenuItem mnemonicParsing="false" text="Delete" />
                             </items>
                         </Menu>
@@ -37,6 +38,11 @@
                 </MenuBar>
                 <ButtonBar nodeOrientation="RIGHT_TO_LEFT">
                     <buttons>
+                  <Button fx:id="timeStampBtn" mnemonicParsing="false" onAction="#addTimeStamp" text="Add Timestamp">
+                      <graphic>
+                          <FontIcon iconLiteral="far-clock" iconSize="16" />
+                      </graphic>
+                  </Button>
                   <Button fx:id="searchBtn" mnemonicParsing="false" onAction="#searchText" text="Search">
                      <graphic>
                         <FontIcon iconLiteral="fas-search" iconSize="16" />

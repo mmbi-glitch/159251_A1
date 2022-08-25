@@ -454,5 +454,3 @@ public class EditorController {
         }
     }
 
-
-}

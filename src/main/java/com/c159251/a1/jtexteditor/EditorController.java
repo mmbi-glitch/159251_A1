@@ -1,9 +1,12 @@
 package com.c159251.a1.jtexteditor;
 
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.DataFormat;
 import javafx.scene.layout.HBox;
 import javafx.stage.FileChooser;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -28,8 +31,12 @@ import java.io.*;
 
 public class EditorController {
 
+    @FXML
+    private Button searchForNextBtn;
+
     private File selectedFile;
     private Clipboard systemClipboard;
+    private String clipboardText;
 
     private Boolean changesMade;
     private Date saveTime;
@@ -101,6 +108,24 @@ public class EditorController {
         });
     }
 
+    // ---------------------------- getters ----------------------------------- //
+
+    public String getClipboardText() {
+        return clipboardText;
+    }
+
+    public TextArea getTextPane() {
+        return textPane;
+    }
+
+    public Label getSearchMatchesLabel() {
+        return searchMatches;
+    }
+
+    public TextField getSearchField() {
+        return searchField;
+    }
+
     // ---------------------------- FILE MENU close and open methods  --------------------------------------- /
 
     @FXML
@@ -143,8 +168,8 @@ public class EditorController {
             PDFTextStripper extractor = new PDFTextStripper();
             String fileToText = extractor.getText(document);
             if (!fileToText.isBlank()) {
-                textPane.setText(formatter.format(new Date()));
-                textPane.appendText("\n\n" + fileToText);
+//                textPane.setText(formatter.format(new Date()));
+                textPane.setText(fileToText);
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -164,8 +189,8 @@ public class EditorController {
                 element = root.getFirstChildElement();
             }
             if (!fileToText.toString().isBlank()) {
-                textPane.setText(formatter.format(new Date()));
-                textPane.appendText("\n\n" + fileToText);
+//                textPane.setText(formatter.format(new Date()));
+                textPane.setText(fileToText.toString());
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -250,6 +275,7 @@ public class EditorController {
         textPane.deleteText(selectFrom, selectTo);
         content.putString(text);
         systemClipboard.setContent(content);
+        clipboardText = systemClipboard.getString();
         onSearchTextChanged();
     }
 
@@ -258,6 +284,7 @@ public class EditorController {
         ClipboardContent content = new ClipboardContent();
         content.putString(textPane.getSelectedText());
         systemClipboard.setContent(content);
+        clipboardText = systemClipboard.getString();
     }
 
     public void pasteText() {
@@ -356,20 +383,28 @@ public class EditorController {
 
     // ---------------------------- FILE MENU save and save as methods ------------------------------------ /
 
+    File getSelectedFile() {
+        return this.selectedFile;
+    }
 
+    void setSelectedFile(File file) {
+        this.selectedFile = file;
+    }
 
     @FXML
     protected void onFileSave() {
         //if save is triggered with no stored file, then it should try as a 'save as'
-        setSavedStatus();
+
         if (selectedFile == null) {
             onFileSaveAs();
             return;
         }
         if (selectedFile.getName().contains(".odt")) {
             saveTextToOdtFile(selectedFile);
+            setSavedStatus();
             return;
         }
+        setSavedStatus();
         saveTextToTxtFile(selectedFile);
     }
 

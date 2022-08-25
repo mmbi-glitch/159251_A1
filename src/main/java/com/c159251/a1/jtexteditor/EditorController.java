@@ -139,6 +139,19 @@ public class EditorController {
         return searchField;
     }
 
+    public String getFileInfo() {
+        return fileInfo.getText();
+    }
+
+    public String getStatusInfo() {
+        return saveStatus.getText();
+    }
+
+    public Animation.Status getTimerRunning() {
+        return secondsTimer.getStatus();
+    }
+
+
     // ---------------------------- FILE MENU close and open methods  --------------------------------------- /
 
     @FXML

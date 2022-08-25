@@ -298,5 +298,11 @@ class EditorLauncherTest {
 
     }
 
+    @Test
+    @Order(16)
+    void testNewFileStatus() {
+        assertEquals("NEW FILE", editorController.getFileInfo());
+        assertTrue(editorController.getStatusInfo().contains("Created"));
+    }
 
 }

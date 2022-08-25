@@ -4,7 +4,6 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
-import javafx.scene.input.InputMethodEvent;
 import javafx.scene.layout.HBox;
 import javafx.stage.FileChooser;
 
@@ -36,6 +35,9 @@ public class EditorController {
 
     private File selectedFile;
     private Clipboard systemClipboard;
+
+    private Boolean changesMade;
+    private Date saveTime;
 
     @FXML
     private Label fileInfo;
@@ -92,8 +94,16 @@ public class EditorController {
         selectTo = new ArrayList<>();
         fileInfo.setText("NEW FILE");
         wordCounts.setText("Words 0:0 Chars");
-        saveStatus.setText("Unsaved");
         timer.setText("0:00:00");
+        setNewStatus();
+        //set up listener for textbox changes
+        textPane.textProperty().addListener(new ChangeListener<String>() {
+            @Override
+            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+                setChangedStatus();
+                setWordCountLabel();
+            }
+        });
     }
 
     // ---------------------------- FILE MENU close and open methods  --------------------------------------- /
@@ -114,18 +124,20 @@ public class EditorController {
         fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
         selectedFile = fileChooser.showOpenDialog(null);
         if (selectedFile != null) {
-
             fileInfo.setText(selectedFile.getName());
 
             if (selectedFile.getName().contains(".odt")) {
                 loadTextFromOdtFile(selectedFile);
+                setOpenStatus();
                 return;
             }
             if (selectedFile.getName().contains(".pdf")) {
                 loadTextFromPdfFile(selectedFile);
+                setOpenStatus();
                 return;
             }
             loadTextFromTxtFile(selectedFile);
+            setOpenStatus();
         }
     }
 
@@ -191,6 +203,46 @@ public class EditorController {
     // ---------------------------------------- STATUS BAR Updaters  --------------------------------------- /
 
 
+    //setChangesMade sets a flag to show changes have been made, and closing without saving will lose changes
+    void setChangedStatus() {
+        this.changesMade = true;
+
+        if(selectedFile == null){
+            this.saveStatus.setText("Not Yet Saved - created " + formatter.format(saveTime));
+        } else {
+            this.saveStatus.setText("Unsaved Changes - last saved " + formatter.format(saveTime));
+        }
+
+    }
+
+    //sets flag to show that no changes have been made, and it is safe to close without losing work
+    void setSavedStatus () {
+        setUnchangedFlags();
+        this.saveStatus.setText("Saved at " + formatter.format(saveTime));
+    }
+
+    void setNewStatus () {
+        setUnchangedFlags();
+        this.saveStatus.setText("Created at " + formatter.format(saveTime));
+    }
+
+    void setOpenStatus () {
+        setUnchangedFlags();
+        this.saveStatus.setText("Opened at " + formatter.format(saveTime));
+    }
+
+    void setUnchangedFlags() {
+        this.saveTime = new Date();
+        this.changesMade = false;
+    }
+
+    void setWordCountLabel() {
+        wordCounts.setText(countWords());
+    }
+
+    String countWords() {
+        return "Words " + textPane.getText().split(" ").length + ":" + textPane.getText().length() + " Chars";
+    }
 
     // ------------------------- EDIT MENU & BUTTON cut/copy/paste/search methods -------------------------- /
 
@@ -309,9 +361,12 @@ public class EditorController {
 
     // ---------------------------- FILE MENU save and save as methods ------------------------------------ /
 
+
+
     @FXML
     protected void onFileSave() {
         //if save is triggered with no stored file, then it should try as a 'save as'
+        setSavedStatus();
         if (selectedFile == null) {
             onFileSaveAs();
             return;
@@ -325,6 +380,7 @@ public class EditorController {
 
     @FXML
     protected void onFileSaveAs() {
+
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter("Plain Text (*.txt)", "*.txt"),
@@ -340,13 +396,16 @@ public class EditorController {
         if (selectedFile != null) {
             if (selectedFile.getName().contains(".odt")) {
                 saveTextToOdtFile(selectedFile);
+                setSavedStatus();
                 return;
             }
             if (selectedFile.getName().contains(".pdf")) {
                 saveTextToPdfFile(selectedFile);
+                setSavedStatus();
                 return;
             }
             saveTextToTxtFile(selectedFile);
+            setSavedStatus();
         }
     }
 

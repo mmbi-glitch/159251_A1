@@ -117,15 +117,15 @@ class EditorLauncherTest {
     void newWindowFrom2to1Instances(FxRobot robot) {
         robot.clickOn("#fileMenu");
         robot.clickOn("#newWindow");
-        WaitForAsyncUtils.waitForFxEvents();
         try {
-            Platform.runLater(() -> editorController.getFileMenu().show());
+            Platform.runLater(() -> Stage.getWindows().get(Stage.getWindows().size() - 1).requestFocus());
         }
         catch (Exception ignored) {}
         WaitForAsyncUtils.waitForFxEvents();
-        robot.clickOn("#closeFile", MouseButton.PRIMARY);
-        editorController.getFileMenu().hide();
+        robot.clickOn("#fileMenu");
+        robot.clickOn("#closeFile");
         WaitForAsyncUtils.waitForFxEvents();
+        editorController.getFileMenu().hide();
         robot.clickOn(editorController.getYesBtn());
         WaitForAsyncUtils.waitForFxEvents();
         assertEquals(1, Stage.getWindows().size());

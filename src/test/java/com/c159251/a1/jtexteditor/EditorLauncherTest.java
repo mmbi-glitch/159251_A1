@@ -19,8 +19,7 @@ import org.testfx.util.WaitForAsyncUtils;
 
 import java.io.File;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(ApplicationExtension.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -41,6 +40,7 @@ class EditorLauncherTest {
         primaryStage.setScene(primaryScene);
         primaryStage.show();
     }
+
 
     // ----------- load files tests ------------------------ //
 
@@ -154,10 +154,12 @@ class EditorLauncherTest {
     }
 
     @Test
-    void saveToText() {
+    @Order(12)
+    void saveToText(FxRobot robot) {
 
         editorController.setSelectedFile(new File("src/test/java/com/c159251/a1/jtexteditor/testSave.txt"));
-        editorController.getTextPane().setText("Testing file");
+        robot.clickOn("#textPane");
+        robot.write("Testing text save");
         editorController.saveTextToTxtFile(editorController.getSelectedFile());
         File tempFile = new File("src/test/java/com/c159251/a1/jtexteditor/testSave.txt");
         assertTrue(tempFile.exists());
@@ -168,11 +170,14 @@ class EditorLauncherTest {
 
     }
 
+
     @Test
-    void saveToOdt() {
+    @Order(13)
+    void saveToOdt(FxRobot robot) {
 
         editorController.setSelectedFile(new File("src/test/java/com/c159251/a1/jtexteditor/testSave.odt"));
-        editorController.getTextPane().setText("Testing ODT file");
+        robot.clickOn("#textPane");
+        robot.write("Testing ODT save");
         editorController.saveTextToOdtFile(editorController.getSelectedFile());
         File tempFile = new File("src/test/java/com/c159251/a1/jtexteditor/testSave.odt");
         assertTrue(tempFile.exists());
@@ -184,10 +189,12 @@ class EditorLauncherTest {
     }
 
     @Test
-    void saveToPdf() {
+    @Order(14)
+    void saveToPdf(FxRobot robot) {
 
         editorController.setSelectedFile(new File("src/test/java/com/c159251/a1/jtexteditor/testSave.pdf"));
-        editorController.getTextPane().setText("Testing PDF file");
+        robot.clickOn("#textPane");
+        robot.write("Testing PDF save");
         editorController.saveTextToOdtFile(editorController.getSelectedFile());
         File tempFile = new File("src/test/java/com/c159251/a1/jtexteditor/testSave.pdf");
         assertTrue(tempFile.exists());
@@ -197,4 +204,16 @@ class EditorLauncherTest {
 
 
     }
+
+    @Test
+    @Order(15)
+    void testWordCount() {
+        editorController.getTextPane().setText("Testing PDF file");
+        assertEquals(editorController.countWords(),"Words 3:16 Chars");
+        editorController.getTextPane().setText("Horse horse horse horse");
+        assertEquals(editorController.countWords(),"Words 4:23 Chars");
+
+    }
+
+
 }

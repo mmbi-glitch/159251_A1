@@ -232,9 +232,9 @@ public class EditorController {
         this.changesMade = true;
 
         if(selectedFile == null){
-          //  this.saveStatus.setText("Not Yet Saved - created " + formatter.format(saveTime));
+            this.saveStatus.setText("Not Yet Saved - created " + formatter.format(saveTime));
         } else {
-          //  this.saveStatus.setText("Unsaved Changes - last saved " + formatter.format(saveTime));
+            this.saveStatus.setText("Unsaved Changes - last saved " + formatter.format(saveTime));
         }
 
     }
@@ -242,17 +242,17 @@ public class EditorController {
     //sets flag to show that no changes have been made, and it is safe to close without losing work
     void setSavedStatus () {
         setUnchangedFlags();
-       // this.saveStatus.setText("Saved at " + formatter.format(saveTime));
+        //this.saveStatus.setText("Saved at " + formatter.format(saveTime));
     }
 
     void setNewStatus () {
         setUnchangedFlags();
-     //   this.saveStatus.setText("Created at " + formatter.format(saveTime));
+        //this.saveStatus.setText("Created at " + formatter.format(saveTime));
     }
 
     void setOpenStatus () {
         setUnchangedFlags();
-      //  this.saveStatus.setText("Opened at " + formatter.format(saveTime));
+        //this.saveStatus.setText("Opened at " + formatter.format(saveTime));
     }
 
     void setUnchangedFlags() {
@@ -261,7 +261,7 @@ public class EditorController {
     }
 
     void setWordCountLabel() {
-        //wordCounts.setText(countWords());
+       // wordCounts.setText(countWords());
     }
 
     String countWords() {

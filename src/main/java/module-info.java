@@ -16,6 +16,7 @@ module com.c159251.a1.jtexteditor {
     requires styled.xml.parser;
     requires layout;
     requires org.apache.commons.lang3;
+    requires javafx.web;
 
     opens com.c159251.a1.jtexteditor to javafx.fxml;
     exports com.c159251.a1.jtexteditor;

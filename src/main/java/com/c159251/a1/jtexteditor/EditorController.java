@@ -158,6 +158,13 @@ public class EditorController {
         return searchField;
     }
 
+    public void setTitle(String newFileName) {
+
+        Stage thisStage = (Stage) textPane.getScene().getWindow();
+        thisStage.setTitle(newFileName + " - Simple Text Editor");
+
+    }
+
     public String getFileInfo() {
         return fileInfo.getText();
     }

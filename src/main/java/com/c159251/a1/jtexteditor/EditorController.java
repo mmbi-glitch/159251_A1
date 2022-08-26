@@ -66,8 +66,7 @@ public class EditorController {
 
     private Config config;
 
-    @FXML
-    private Label fileInfo;
+
     @FXML
     private Label wordCounts;
     @FXML
@@ -99,7 +98,7 @@ public class EditorController {
     @FXML
     private Label searchMatches;
 
-    private SimpleDateFormat dateformatter;
+    private SimpleDateFormat dateformatter = new SimpleDateFormat("HH:mm dd/MM/yy");
 
     private int searchCount;
     private int selectCount;
@@ -124,7 +123,7 @@ public class EditorController {
         searchBar.setVisible(false);
         selectFrom = new ArrayList<>();
         selectTo = new ArrayList<>();
-        fileInfo.setText("NEW FILE");
+
         wordCounts.setText("Words 0:0 Chars");
         timer.setText("00:00:00");
         secondsTimer.setCycleCount(Animation.INDEFINITE);
@@ -165,9 +164,7 @@ public class EditorController {
 
     }
 
-    public String getFileInfo() {
-        return fileInfo.getText();
-    }
+
 
     public String getStatusInfo() {
         return saveStatus.getText();
@@ -255,7 +252,7 @@ public class EditorController {
         fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
         selectedFile = fileChooser.showOpenDialog(null);
         if (selectedFile != null) {
-            fileInfo.setText(selectedFile.getName());
+            setTitle(selectedFile.getName());
 
             if (selectedFile.getName().contains(".odt")) {
                 loadTextFromOdtFile(selectedFile);
@@ -382,6 +379,14 @@ public class EditorController {
     }
 
     // ------------------------- EDIT MENU & BUTTON cut/copy/paste/search methods -------------------------- /
+
+    public void addTimeStamp() {
+
+        timeStamp = dateformatter.format(new Date());
+        textPane.setText(timeStamp + "\n\n" + textPane.getText());
+
+
+    }
 
     public void cutText() {
         ClipboardContent content = new ClipboardContent();

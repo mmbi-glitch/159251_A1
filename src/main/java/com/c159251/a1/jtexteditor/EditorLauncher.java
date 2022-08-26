@@ -44,7 +44,7 @@ public class EditorLauncher extends Application {
 
     public static void getYaml() {
         Yaml config = new Yaml();
-        InputStream inputStream = EditorLauncher.class.getClassLoader().getResourceAsStream("config.yaml");
+        InputStream inputStream = EditorLauncher.class.getClassLoader().getResourceAsStream("com/c159251/a1/jtexteditor/config.yaml");
         Map<String,Object> obj = config.load(inputStream);
         System.out.println(obj);
     }

@@ -130,6 +130,13 @@
             <version>1.21</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.snakeyaml</groupId>
+            <artifactId>snakeyaml-engine</artifactId>
+            <version>2.3</version>
+        </dependency>
+
+
 
     </dependencies>
 

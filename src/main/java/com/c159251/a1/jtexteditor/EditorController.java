@@ -39,6 +39,7 @@ public class EditorController {
 
     @FXML
     public Button timeStampBtn;
+    public String timeStamp;
     @FXML
     private Button searchForNextBtn;
 
@@ -146,6 +147,10 @@ public class EditorController {
 
     public Animation.Status getTimerRunning() {
         return secondsTimer.getStatus();
+    }
+
+    public String getTimeStamp(){
+        return timeStamp;
     }
 
 
@@ -297,8 +302,8 @@ public class EditorController {
 
     public void addTimeStamp() {
 
-       // textPane.setText(dateformatter.format(new Date()));
-        textPane.setText(dateformatter.format(new Date()) + "\n\n" + textPane.getText());
+        timeStamp = dateformatter.format(new Date());
+        textPane.setText(timeStamp + "\n\n" + textPane.getText());
 
 
     }

@@ -1,5 +1,6 @@
 package com.c159251.a1.jtexteditor;
 
+import javafx.animation.Animation;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -314,4 +315,18 @@ class EditorLauncherTest {
         assertTrue(editorController.getStatusInfo().contains("Not Yet Saved"));
     }
 
+    @Test
+    @Order(17)
+    void testAddTimeStamp(FxRobot robot) {
+        robot.clickOn("#timeStampBtn");
+        assertTrue(editorController.getTextPane().getText().contains(editorController.getTimeStamp()));
+
+    }
+
+    @Test
+    @Order(18)
+    void testTimerRunning() {
+        assertEquals(editorController.getTimerRunning(), Animation.Status.RUNNING);
+
+    }
 }

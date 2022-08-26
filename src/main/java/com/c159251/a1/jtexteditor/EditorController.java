@@ -3,8 +3,6 @@ package com.c159251.a1.jtexteditor;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.input.Clipboard;
@@ -12,6 +10,7 @@ import javafx.scene.input.ClipboardContent;
 import javafx.scene.layout.HBox;
 import javafx.stage.FileChooser;
 
+import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
@@ -30,8 +29,8 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import java.io.*;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.Objects;
+import java.util.Optional;
 
 /** This class is connected with the fxml config file and is responsible for the main program logic. **/
 
@@ -106,7 +105,6 @@ public class EditorController {
         searchBar.setVisible(false);
         selectFrom = new ArrayList<>();
         selectTo = new ArrayList<>();
-        fileInfo.setText("NEW FILE");
         wordCounts.setText("Words 0:0 Chars");
         timer.setText("00:00:00");
         secondsTimer.setCycleCount(Animation.INDEFINITE);
@@ -137,6 +135,13 @@ public class EditorController {
         return searchField;
     }
 
+    public void setTitle(String newFileName) {
+
+        Stage thisStage = (Stage) textPane.getScene().getWindow();
+        thisStage.setTitle(newFileName + " - Simple Text Editor");
+
+    }
+
     public String getFileInfo() {
         return fileInfo.getText();
     }
@@ -158,7 +163,21 @@ public class EditorController {
 
     @FXML
     protected void onFileClose() {
-        System.exit(0);
+        //add test for unsaved
+        if(changesMade) {
+
+            YesNoCancel alert = new YesNoCancel();
+            alert.showAndWait().ifPresent(response -> {
+                if(Objects.equals(response.getText(), "Yes")) {
+                    onFileSave();
+                }
+                if(!Objects.equals(response.getText(),"Cancel")) {
+                    System.exit(0);
+                }
+            });
+
+        }
+
     }
 
     @FXML
@@ -172,7 +191,7 @@ public class EditorController {
         fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
         selectedFile = fileChooser.showOpenDialog(null);
         if (selectedFile != null) {
-            fileInfo.setText(selectedFile.getName());
+            setTitle(selectedFile.getName());
 
             if (selectedFile.getName().contains(".odt")) {
                 loadTextFromOdtFile(selectedFile);
@@ -196,7 +215,6 @@ public class EditorController {
             PDFTextStripper extractor = new PDFTextStripper();
             String fileToText = extractor.getText(document);
             if (!fileToText.isBlank()) {
-//                textPane.setText(formatter.format(new Date()));
                 textPane.setText(fileToText);
             }
         } catch (IOException e) {
@@ -217,7 +235,6 @@ public class EditorController {
                 element = root.getFirstChildElement();
             }
             if (!fileToText.toString().isBlank()) {
-//                textPane.setText(formatter.format(new Date()));
                 textPane.setText(fileToText.toString());
             }
         } catch (Exception e) {
@@ -273,6 +290,7 @@ public class EditorController {
     void setSavedStatus () {
         setUnchangedFlags();
         this.saveStatus.setText("Saved at " + dateformatter.format(saveTime));
+        setTitle(selectedFile.getName());
     }
 
     void setNewStatus () {
@@ -283,6 +301,7 @@ public class EditorController {
     void setOpenStatus () {
         setUnchangedFlags();
         this.saveStatus.setText("Opened at " + dateformatter.format(saveTime));
+        setTitle(selectedFile.getName());
     }
 
     void setUnchangedFlags() {

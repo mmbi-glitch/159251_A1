@@ -3,9 +3,6 @@ package com.c159251.a1.jtexteditor;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.print.PageLayout;
@@ -34,11 +31,8 @@ import org.w3c.dom.Node;
 import com.itextpdf.kernel.pdf.*;
 import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.Paragraph;
-
-import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.util.*;
-
 import java.io.*;
 import java.util.Objects;
 
@@ -62,9 +56,6 @@ public class EditorController {
     private int elapsedSeconds;
     private Boolean changesMade;
     private Date saveTime;
-
-    @FXML
-    private Label fileInfo;
     @FXML
     private Label wordCounts;
     @FXML
@@ -155,10 +146,6 @@ public class EditorController {
         Stage thisStage = (Stage) textPane.getScene().getWindow();
         thisStage.setTitle(newFileName + " - JText Editor");
 
-    }
-
-    public String getFileInfo() {
-        return fileInfo.getText();
     }
 
     public String getStatusInfo() {

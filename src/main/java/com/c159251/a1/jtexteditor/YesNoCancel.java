@@ -9,7 +9,7 @@ public class YesNoCancel extends Alert {
     public YesNoCancel() {
         super(AlertType.WARNING);
         this.setTitle("Unsaved Changes Exist");
-        this.setHeaderText("Do you want to save before exiting/clearing?");
+        this.setHeaderText("Do you want to save before exiting?");
         ButtonType yesButton = ButtonType.YES;
         ButtonType noButton = ButtonType.NO;
         ButtonType cancelButton = ButtonType.CANCEL;

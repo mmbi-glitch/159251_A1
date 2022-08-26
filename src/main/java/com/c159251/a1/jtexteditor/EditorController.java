@@ -36,8 +36,12 @@ import java.util.Objects;
 public class EditorController {
 
     @FXML
-    public Button timeStampBtn;
-    public String timeStamp;
+    private Menu fileMenu;
+    @FXML
+    private Button timeStampBtn;
+    private String timeStamp;
+    @FXML
+    private MenuItem newFile;
     @FXML
     private Button searchForNextBtn;
 
@@ -85,12 +89,14 @@ public class EditorController {
 
     private int searchCount;
     private int selectCount;
-    ArrayList<Integer> selectFrom;
-    ArrayList<Integer> selectTo;
+    private ArrayList<Integer> selectFrom;
+    private ArrayList<Integer> selectTo;
 
-    Timeline secondsTimer = new Timeline(new KeyFrame(
+    private Timeline secondsTimer = new Timeline(new KeyFrame(
             Duration.millis(1000),
             ae -> setTimerText()));
+
+    private YesNoCancel alert;
 
 
 
@@ -135,7 +141,6 @@ public class EditorController {
     }
 
     public void setTitle(String newFileName) {
-
         Stage thisStage = (Stage) textPane.getScene().getWindow();
         thisStage.setTitle(newFileName + " - JText Editor");
 
@@ -158,6 +163,59 @@ public class EditorController {
     }
 
 
+
+    public javafx.scene.Node getYesBtn() {
+        return alert.getDialogPane().lookupButton(ButtonType.YES);
+    }
+
+    public javafx.scene.Node getNoBtn() {
+        return alert.getDialogPane().lookupButton(ButtonType.NO);
+    }
+
+    public Menu getFileMenu() {
+        return fileMenu;
+    }
+
+    public javafx.scene.Node getCancelBtn() {
+        return alert.getDialogPane().lookupButton(ButtonType.CANCEL);
+    }
+
+    // ------------------------- FILE MENU new and new window methods -------------------------------------- //
+
+    // this should clear the text in the text area
+    public void onFileNew() {
+        if(changesMade) {
+            alert = new YesNoCancel();
+            alert.setHeaderText("Do you want to save before clearing?");
+            alert.showAndWait().ifPresent(response -> {
+                if(Objects.equals(response, ButtonType.YES)) {
+                    onFileSave();
+                    textPane.clear();
+                    setSelectedFile(null);
+                    setTitle("NEW FILE");
+                    setNewStatus();
+                }
+                if (!Objects.equals(response, ButtonType.CANCEL)) {
+                    textPane.clear();
+                    setSelectedFile(null);
+                    setTitle("NEW FILE");
+                    setNewStatus();
+                }
+            });
+        }
+    }
+
+    // this should open a new program window
+    public void onFileNewWindow() {
+        try {
+            new EditorLauncher().start(new Stage());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+
     // ---------------------------- FILE MENU close and open methods  --------------------------------------- /
 
 
@@ -165,7 +223,8 @@ public class EditorController {
     protected void onFileClose() {
         //add test for unsaved
         if(changesMade) {
-            YesNoCancel alert = new YesNoCancel();
+            alert = new YesNoCancel();
+            alert.setHeaderText("Do you want to save before exiting?");
             alert.showAndWait().ifPresent(response -> {
                 if(Objects.equals(response, ButtonType.YES)) {
                     onFileSave();
@@ -273,7 +332,7 @@ public class EditorController {
     protected void setChangedStatus() {
         this.changesMade = true;
 
-        if(selectedFile == null){
+        if(selectedFile == null) {
             this.saveStatus.setText("Not Yet Saved - created " + dateFormatter.format(saveTime));
         } else {
             this.saveStatus.setText("Unsaved Changes - last saved " + dateFormatter.format(saveTime));

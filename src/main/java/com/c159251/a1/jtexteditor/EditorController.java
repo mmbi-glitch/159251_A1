@@ -3,17 +3,19 @@ package com.c159251.a1.jtexteditor;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.print.PageLayout;
+import javafx.print.PrinterJob;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
 import javafx.stage.FileChooser;
 
 import javafx.stage.Stage;
@@ -29,11 +31,8 @@ import org.w3c.dom.Node;
 import com.itextpdf.kernel.pdf.*;
 import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.Paragraph;
-
-import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.util.*;
-
 import java.io.*;
 import java.util.Objects;
 
@@ -57,9 +56,6 @@ public class EditorController {
     private int elapsedSeconds;
     private Boolean changesMade;
     private Date saveTime;
-
-    @FXML
-    private Label fileInfo;
     @FXML
     private Label wordCounts;
     @FXML
@@ -150,10 +146,6 @@ public class EditorController {
         Stage thisStage = (Stage) textPane.getScene().getWindow();
         thisStage.setTitle(newFileName + " - JText Editor");
 
-    }
-
-    public String getFileInfo() {
-        return fileInfo.getText();
     }
 
     public String getStatusInfo() {
@@ -618,20 +610,56 @@ public class EditorController {
         }
     }
 
+    // --------------------- File MENU print method ------------------- //
+    @FXML
+    protected void onFilePrint() {
+        TextFlow printArea = new TextFlow(new Text(textPane.getText()));
+        PrinterJob printerJob = PrinterJob.createPrinterJob();
+        if (printerJob.showPageSetupDialog(textPane.getScene().getWindow())) {
+            PageLayout pageLayout = printerJob.getJobSettings().getPageLayout();
+            printArea.setMaxWidth(pageLayout.getPrintableWidth());
+            Stage printStage = new Stage();
+            printStage.setScene(new Scene(new FlowPane(printArea)));
+            printStage.show();
+            double totalPrintHeight = printStage.getHeight();
+            printStage.hide();
+            int allPages = 1;
+            while (totalPrintHeight > 0) {
+                totalPrintHeight -= pageLayout.getPrintableHeight();
+                allPages++;
+            }
+            int numOfPagesToPrint;
+            boolean printSuccess = false;
+            if (printerJob.showPrintDialog(textPane.getScene().getWindow())) {
+                if (printerJob.getJobSettings().getPageRanges() == null) {
+                    numOfPagesToPrint = allPages;
+                }
+                else {
+                    numOfPagesToPrint = printerJob.getJobSettings().getPageRanges()[0].getEndPage() + 1;
+                }
+                for (int i = 1; i < numOfPagesToPrint; i++) {
+                    printSuccess = printerJob.printPage(printArea);
+                    printArea.setTranslateY(-1 * pageLayout.getPrintableHeight() * i);
+                }
+                if (printSuccess) {
+                    printerJob.endJob();
+                }
+            }
+        }
+    }
 
-    // ---------------------------------misc -------------------------//
-    public void openAbout(ActionEvent actionEvent) {
 
+
+    // --------------------------------- help MENU about method -------------------------//
+    @FXML
+    protected void openAbout() {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("aboutwindow-layout.fxml"));
-
         try {
-
             Parent root = loader.load();
             Stage stageAbout = new Stage();
             stageAbout.setTitle("About This Project");
             stageAbout.setScene(new Scene(root,600,400));
             stageAbout.show();
-
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -347,22 +347,6 @@ class EditorLauncherTest {
 
     @Test
     @Order(20)
-    void testNewFileStatus() {
-        assertEquals("NEW FILE", editorController.getFileInfo());
-        assertTrue(editorController.getStatusInfo().contains("Created"));
-    }
-
-    @Test
-    @Order(21)
-    void testNewFileChangedStatus(FxRobot robot) {
-        robot.clickOn("#textPane");
-        robot.write("Hello");
-        assertEquals("NEW FILE", editorController.getFileInfo());
-        assertTrue(editorController.getStatusInfo().contains("Not Yet Saved"));
-    }
-
-    @Test
-    @Order(22)
     void testAddTimeStamp(FxRobot robot) {
         robot.clickOn("#timeStampBtn");
         assertTrue(editorController.getTextPane().getText().contains(editorController.getTimeStamp()));
@@ -370,7 +354,7 @@ class EditorLauncherTest {
     }
 
     @Test
-    @Order(23)
+    @Order(21)
     void testTimerRunning() {
         assertEquals(editorController.getTimerRunning(), Animation.Status.RUNNING);
     }

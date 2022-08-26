@@ -19,20 +19,11 @@ public class EditorLauncher extends Application {
         EditorController editorController = fxmlLoader.getController();
         editorController.initialize();
         Scene primaryScene = new Scene(root, 720, 480);
-        primaryStage.setTitle("NEW FILE - JText Editor");
+        primaryStage.setTitle("Simple Text Editor");
         primaryStage.setScene(primaryScene);
         primaryStage.show();
-        primaryStage.setOnCloseRequest(e -> {
-            YesNoCancel alert = new YesNoCancel();
-            alert.showAndWait().ifPresent(response -> {
-                if(Objects.equals(response, ButtonType.YES)) {
-                    editorController.onFileSave();
-                }
-                if(!Objects.equals(response, ButtonType.CANCEL)) {
-                    Stage.getWindows().get(Stage.getWindows().size() - 1).hide();
-                }
-            });
-        });
+
+
     }
 
     public static void main(String[] args) {

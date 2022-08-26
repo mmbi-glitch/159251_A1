@@ -19,7 +19,7 @@ public class EditorLauncher extends Application {
         EditorController editorController = fxmlLoader.getController();
         editorController.initialize();
         Scene primaryScene = new Scene(root, 720, 480);
-        primaryStage.setTitle("NEW FILE - Simple Text Editor");
+        primaryStage.setTitle("NEW FILE - JText Editor");
         primaryStage.setScene(primaryScene);
         primaryStage.show();
 

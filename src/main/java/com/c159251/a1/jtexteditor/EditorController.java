@@ -3,7 +3,13 @@ package com.c159251.a1.jtexteditor;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
@@ -24,9 +30,9 @@ import com.itextpdf.kernel.pdf.*;
 import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.Paragraph;
 
+import java.nio.file.Path;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
+import java.util.*;
 
 import java.io.*;
 import java.util.Objects;
@@ -610,6 +616,27 @@ public class EditorController {
                 e.printStackTrace();
             }
         }
+    }
+
+
+    // ---------------------------------misc -------------------------//
+    public void openAbout(ActionEvent actionEvent) {
+
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("aboutwindow-layout.fxml"));
+
+        try {
+
+            Parent root = loader.load();
+            Stage stageAbout = new Stage();
+            stageAbout.setTitle("About This Project");
+            stageAbout.setScene(new Scene(root,600,400));
+            stageAbout.show();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
     }
 
 

@@ -35,11 +35,19 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import java.io.*;
+import java.util.Objects;
 
 /** This class is connected with the fxml config file and is responsible for the main program logic. **/
 
 public class EditorController {
 
+    @FXML
+    private Menu fileMenu;
+    @FXML
+    private Button timeStampBtn;
+    private String timeStamp;
+    @FXML
+    private MenuItem newFile;
     @FXML
     private Button searchForNextBtn;
 
@@ -83,44 +91,40 @@ public class EditorController {
     @FXML
     private Label searchMatches;
 
-    private SimpleDateFormat dateformatter;
+    private final SimpleDateFormat dateFormatter = new SimpleDateFormat("HH:mm dd/MM/yyyy");
 
     private int searchCount;
     private int selectCount;
-    ArrayList<Integer> selectFrom;
-    ArrayList<Integer> selectTo;
+    private ArrayList<Integer> selectFrom;
+    private ArrayList<Integer> selectTo;
 
-    Timeline secondsTimer = new Timeline(new KeyFrame(
+    private Timeline secondsTimer = new Timeline(new KeyFrame(
             Duration.millis(1000),
             ae -> setTimerText()));
+
+    private YesNoCancel alert;
 
 
 
     // ---------------------------- initializing method --------------------------------------- /
-    @FXML
-    public void initialize() {
+
+    protected void initialize() {
         systemClipboard = Clipboard.getSystemClipboard();
-        // append date and time to text pane
-        dateformatter = new SimpleDateFormat("HH:mm dd/MM/yyyy");
-        textPane.setText(dateformatter.format(new Date()));
-        textPane.appendText("\n\n");
+        // append date and time to text pane moved to a function
+
         searchBar.setManaged(false);
         searchBar.setVisible(false);
         selectFrom = new ArrayList<>();
         selectTo = new ArrayList<>();
-        fileInfo.setText("NEW FILE");
         wordCounts.setText("Words 0:0 Chars");
         timer.setText("00:00:00");
         secondsTimer.setCycleCount(Animation.INDEFINITE);
         secondsTimer.play();
         setNewStatus();
-        //set up listener for textbox changes
-        textPane.textProperty().addListener(new ChangeListener<String>() {
-            @Override
-            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-                setChangedStatus();
-                setWordCountLabel();
-            }
+        //set up listener for text pane changes
+        textPane.textProperty().addListener((observable, oldValue, newValue) -> {
+            setChangedStatus();
+            setWordCountLabel();
         });
     }
 
@@ -142,6 +146,12 @@ public class EditorController {
         return searchField;
     }
 
+    public void setTitle(String newFileName) {
+        Stage thisStage = (Stage) textPane.getScene().getWindow();
+        thisStage.setTitle(newFileName + " - JText Editor");
+
+    }
+
     public String getFileInfo() {
         return fileInfo.getText();
     }
@@ -154,16 +164,90 @@ public class EditorController {
         return secondsTimer.getStatus();
     }
 
+    public String getTimeStamp(){
+        return timeStamp;
+    }
+
+
+
+    public javafx.scene.Node getYesBtn() {
+        return alert.getDialogPane().lookupButton(ButtonType.YES);
+    }
+
+    public javafx.scene.Node getNoBtn() {
+        return alert.getDialogPane().lookupButton(ButtonType.NO);
+    }
+
+    public Menu getFileMenu() {
+        return fileMenu;
+    }
+
+    public javafx.scene.Node getCancelBtn() {
+        return alert.getDialogPane().lookupButton(ButtonType.CANCEL);
+    }
+
+    // ------------------------- FILE MENU new and new window methods -------------------------------------- //
+
+    // this should clear the text in the text area
+    public void onFileNew() {
+        if(changesMade) {
+            alert = new YesNoCancel();
+            alert.setHeaderText("Do you want to save before clearing?");
+            alert.showAndWait().ifPresent(response -> {
+                if(Objects.equals(response, ButtonType.YES)) {
+                    onFileSave();
+                    textPane.clear();
+                    setSelectedFile(null);
+                    setTitle("NEW FILE");
+                    setNewStatus();
+                }
+                if (!Objects.equals(response, ButtonType.CANCEL)) {
+                    textPane.clear();
+                    setSelectedFile(null);
+                    setTitle("NEW FILE");
+                    setNewStatus();
+                }
+            });
+        }
+    }
+
+    // this should open a new program window
+    public void onFileNewWindow() {
+        try {
+            new EditorLauncher().start(new Stage());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
 
     // ---------------------------- FILE MENU close and open methods  --------------------------------------- /
 
-    @FXML
-    protected void onFileClose() {
-        System.exit(0);
-    }
 
     @FXML
-    public void onFileOpen() {
+    protected void onFileClose() {
+        //add test for unsaved
+        if(changesMade) {
+            alert = new YesNoCancel();
+            alert.setHeaderText("Do you want to save before exiting?");
+            alert.showAndWait().ifPresent(response -> {
+                if(Objects.equals(response, ButtonType.YES)) {
+                    onFileSave();
+                }
+                if(!Objects.equals(response, ButtonType.CANCEL)) {
+                    Stage.getWindows().get(Stage.getWindows().size() - 1).hide();
+                }
+            });
+        }
+        else {
+            Stage.getWindows().get(Stage.getWindows().size() - 1).hide();
+        }
+    }
+
+
+    @FXML
+    protected void onFileOpen() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter("Plain Text (*.txt)", "*.txt"),
@@ -173,7 +257,7 @@ public class EditorController {
         fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
         selectedFile = fileChooser.showOpenDialog(null);
         if (selectedFile != null) {
-            fileInfo.setText(selectedFile.getName());
+            setTitle(selectedFile.getName());
 
             if (selectedFile.getName().contains(".odt")) {
                 loadTextFromOdtFile(selectedFile);
@@ -197,7 +281,6 @@ public class EditorController {
             PDFTextStripper extractor = new PDFTextStripper();
             String fileToText = extractor.getText(document);
             if (!fileToText.isBlank()) {
-//                textPane.setText(formatter.format(new Date()));
                 textPane.setText(fileToText);
             }
         } catch (IOException e) {
@@ -218,7 +301,6 @@ public class EditorController {
                 element = root.getFirstChildElement();
             }
             if (!fileToText.toString().isBlank()) {
-//                textPane.setText(formatter.format(new Date()));
                 textPane.setText(fileToText.toString());
             }
         } catch (Exception e) {
@@ -253,55 +335,64 @@ public class EditorController {
 
 
     //setChangesMade sets a flag to show changes have been made, and closing without saving will lose changes
-    void setChangedStatus() {
+    protected void setChangedStatus() {
         this.changesMade = true;
 
-        if(selectedFile == null){
-            this.saveStatus.setText("Not Yet Saved - created " + dateformatter.format(saveTime));
+        if(selectedFile == null) {
+            this.saveStatus.setText("Not Yet Saved - created " + dateFormatter.format(saveTime));
         } else {
-            this.saveStatus.setText("Unsaved Changes - last saved " + dateformatter.format(saveTime));
+            this.saveStatus.setText("Unsaved Changes - last saved " + dateFormatter.format(saveTime));
         }
 
     }
 
     //sets the text on the timer from window open
-    void setTimerText() {
+    protected void setTimerText() {
         elapsedSeconds += 1;
         timer.setText(String.format("%02d:%02d:%02d",(elapsedSeconds/3600),(elapsedSeconds % 3600) / 60,elapsedSeconds % 60));
     }
 
     //sets flag to show that no changes have been made, and it is safe to close without losing work
-    void setSavedStatus () {
+    protected void setSavedStatus() {
         setUnchangedFlags();
-        this.saveStatus.setText("Saved at " + dateformatter.format(saveTime));
+        this.saveStatus.setText("Saved at " + dateFormatter.format(saveTime));
+        setTitle(selectedFile.getName());
     }
 
-    void setNewStatus () {
+    protected void setNewStatus() {
         setUnchangedFlags();
-        this.saveStatus.setText("Created at " + dateformatter.format(saveTime));
+        this.saveStatus.setText("Created at " + dateFormatter.format(saveTime));
     }
 
-    void setOpenStatus () {
+    protected void setOpenStatus() {
         setUnchangedFlags();
-        this.saveStatus.setText("Opened at " + dateformatter.format(saveTime));
+        this.saveStatus.setText("Opened at " + dateFormatter.format(saveTime));
+        setTitle(selectedFile.getName());
     }
 
-    void setUnchangedFlags() {
+    protected void setUnchangedFlags() {
         this.saveTime = new Date();
         this.changesMade = false;
     }
 
-    void setWordCountLabel() {
+    protected void setWordCountLabel() {
         wordCounts.setText(countWords());
     }
 
-    String countWords() {
-        return "Words " + textPane.getText().split(" ").length + ":" + textPane.getText().length() + " Chars";
+    protected String countWords() {
+        return "Words " + textPane.getText().split("\\s+").length + ":" + textPane.getText().length() + " Chars";
     }
 
-    // ------------------------- EDIT MENU & BUTTON cut/copy/paste/search methods -------------------------- /
+    // ------------------------- EDIT MENU & BUTTON cut/copy/paste/search/datetime methods -------------------------- /
 
-    public void cutText() {
+    @FXML
+    protected void addTimeStamp() {
+        timeStamp = dateFormatter.format(new Date());
+        textPane.setText(timeStamp + "\n\n" + textPane.getText());
+    }
+
+    @FXML
+    protected void cutText() {
         ClipboardContent content = new ClipboardContent();
         String text = textPane.getSelectedText();
         //fixing this particular action, it needs the anchor value (anchor and caretPosition make up the selection range)
@@ -315,14 +406,16 @@ public class EditorController {
     }
 
 
-    public void copyText() {
+    @FXML
+    protected void copyText() {
         ClipboardContent content = new ClipboardContent();
         content.putString(textPane.getSelectedText());
         systemClipboard.setContent(content);
         clipboardText = systemClipboard.getString();
     }
 
-    public void pasteText() {
+    @FXML
+    protected void pasteText() {
         if (!systemClipboard.getString().isBlank()) {
             // fixing paste issue where the caret position keeps moving
             int caretPos = textPane.getCaretPosition(); // storing the caret position
@@ -332,12 +425,14 @@ public class EditorController {
         }
     }
 
-    public void searchText() {
+    @FXML
+    protected void searchText() {
         searchBar.setManaged(true);
         searchBar.setVisible(true);
     }
 
-    public void onSearchTextChanged() {
+    @FXML
+    protected void onSearchTextChanged() {
         String searchedText = searchField.getText();
         // first, the text could be blank, so we deal with that issue first
         if (searchedText.isBlank()) {
@@ -350,7 +445,7 @@ public class EditorController {
 
         // init vars here
         searchCount = 0;
-        int searchFrom = 0;
+        int searchFrom; //removed the initialisation on intelliJ recommendation
         int searchTo = textPane.getText().length();
         selectFrom.clear();
         selectTo.clear();
@@ -388,7 +483,8 @@ public class EditorController {
         }
     }
 
-    public void searchForNext() {
+    @FXML
+    protected void searchForNext() {
         selectCount++;
         if (selectCount == searchCount) {
             selectCount = 0;
@@ -399,7 +495,8 @@ public class EditorController {
         }
     }
 
-    public void searchForPrevious() {
+    @FXML
+    protected void searchForPrevious() {
         selectCount--;
         if (selectCount == -1) {
             selectCount = searchCount - 1;
@@ -410,7 +507,8 @@ public class EditorController {
         }
     }
 
-    public void closeSearch() {
+    @FXML
+    protected void closeSearch() {
         searchBar.setManaged(false);
         searchBar.setVisible(false);
     }
@@ -418,11 +516,11 @@ public class EditorController {
 
     // ---------------------------- FILE MENU save and save as methods ------------------------------------ /
 
-    File getSelectedFile() {
+    protected File getSelectedFile() {
         return this.selectedFile;
     }
 
-    void setSelectedFile(File file) {
+    protected void setSelectedFile(File file) {
         this.selectedFile = file;
     }
 
@@ -442,6 +540,7 @@ public class EditorController {
         setSavedStatus();
         saveTextToTxtFile(selectedFile);
     }
+
 
     @FXML
     protected void onFileSaveAs() {
@@ -476,7 +575,7 @@ public class EditorController {
 
     // ---------------------------- 'saving text to file' methods --------------------------------------- /
 
-    public void saveTextToPdfFile(File fileToSave) {
+    protected void saveTextToPdfFile(File fileToSave) {
         if (!textPane.getText().isBlank()) {
             try (PdfDocument pdf = new PdfDocument(new PdfWriter(fileToSave))) {
                 Document doc = new Document(pdf);
@@ -488,7 +587,7 @@ public class EditorController {
         }
     }
 
-    public void saveTextToOdtFile(File fileToSave) {
+    protected void saveTextToOdtFile(File fileToSave) {
         if (!textPane.getText().isBlank()) {
             try (OdfTextDocument document = OdfTextDocument.newTextDocument()) {
                 OfficeTextElement officeText = document.getContentRoot();
@@ -508,7 +607,7 @@ public class EditorController {
         }
     }
 
-    public void saveTextToTxtFile(File fileToSave) {
+    protected void saveTextToTxtFile(File fileToSave) {
         //if the text is not blank, then write text to file
         if (!textPane.getText().isBlank()) {
             try (BufferedWriter fileWriter = new BufferedWriter(new FileWriter(fileToSave))) {

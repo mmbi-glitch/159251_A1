@@ -1,5 +1,6 @@
 package com.c159251.a1.jtexteditor;
 
+import javafx.animation.Animation;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -88,10 +89,56 @@ class EditorLauncherTest {
         Assertions.assertThat(editorController.getTextPane()).hasText("Testing in JavaFX is testing me.\n");
     }
 
-    // ----------- clipboard cut/copy/paste tests ------------- //
+    // -------------------- new file and new window tests --------------------------- //
 
     @Test
     @Order(4)
+    void newFileClear(FxRobot robot) {
+        robot.clickOn("#textPane");
+        robot.write("Testing testing");
+        robot.clickOn("#fileMenu");
+        robot.clickOn("#newFile");
+        WaitForAsyncUtils.waitForFxEvents();
+        robot.clickOn(editorController.getNoBtn());
+        Assertions.assertThat(editorController.getTextPane().getText()).isEqualTo("");
+    }
+
+    @Test
+    @Order(5)
+    void newFileDontClear(FxRobot robot) {
+        robot.clickOn("#textPane");
+        robot.write("Testing testing");
+        robot.clickOn("#fileMenu");
+        robot.clickOn("#newFile");
+        robot.clickOn(editorController.getCancelBtn());
+        Assertions.assertThat(editorController.getTextPane().getText()).isNotBlank();
+    }
+
+    @Test
+    @Order(6)
+    void newWindowFrom1to2Instances(FxRobot robot) {
+        robot.clickOn("#fileMenu");
+        robot.clickOn("#newWindow");
+        WaitForAsyncUtils.waitForFxEvents();
+        assertEquals(2, Stage.getWindows().size());
+        // clean up afterwards
+        try { Platform.runLater(() -> Stage.getWindows().get(Stage.getWindows().size() - 1).hide()); }
+        catch (Exception e) {e.printStackTrace();}
+        WaitForAsyncUtils.waitForFxEvents();
+    }
+
+    @Test
+    @Order(7)
+    void newWindowFrom1to0Instances(FxRobot robot) {
+        robot.clickOn("#fileMenu");
+        robot.clickOn("#closeFile");
+        assertEquals(0, Stage.getWindows().size());
+    }
+
+    // ----------- clipboard cut/copy/paste tests ------------- //
+
+    @Test
+    @Order(8)
     void copyText(FxRobot robot) {
         Platform.runLater( () -> {
             try {
@@ -107,7 +154,7 @@ class EditorLauncherTest {
     }
 
     @Test
-    @Order(5)
+    @Order(9)
     void cutText(FxRobot robot) {
         Platform.runLater( () -> {
             try {
@@ -124,7 +171,7 @@ class EditorLauncherTest {
     }
 
     @Test
-    @Order(6)
+    @Order(10)
     void copyAndPasteText(FxRobot robot) {
         Platform.runLater( () -> {
             try {
@@ -147,7 +194,7 @@ class EditorLauncherTest {
     // ------------ searching text tests ---------------- //
 
     @Test
-    @Order(7)
+    @Order(11)
     void searchBlank(FxRobot robot) {
         Platform.runLater( () -> {
             try {
@@ -164,7 +211,7 @@ class EditorLauncherTest {
         Assertions.assertThat(editorController.getSearchMatchesLabel()).hasText("No matches");
     }
     @Test
-    @Order(8)
+    @Order(12)
     void searchNoMatches(FxRobot robot) {
         Platform.runLater( () -> {
             try {
@@ -180,7 +227,7 @@ class EditorLauncherTest {
         Assertions.assertThat(editorController.getSearchMatchesLabel()).hasText("No matches");
     }
     @Test
-    @Order(9)
+    @Order(13)
     void search1Matches(FxRobot robot) {
         Platform.runLater( () -> {
             try {
@@ -197,7 +244,7 @@ class EditorLauncherTest {
     }
 
     @Test
-    @Order(10)
+    @Order(14)
     void search2Matches(FxRobot robot) {
         robot.clickOn("#textPane");
         robot.write("Hello Hello how are you doing?");
@@ -208,7 +255,7 @@ class EditorLauncherTest {
     }
 
     @Test
-    @Order(11)
+    @Order(15)
     void search2of2Matches(FxRobot robot) {
         robot.clickOn("#textPane");
         robot.write("Hello Hello how are you doing?");
@@ -220,7 +267,7 @@ class EditorLauncherTest {
     }
 
     @Test
-    @Order(12)
+    @Order(16)
     void saveToText(FxRobot robot) {
 
         editorController.setSelectedFile(new File("src/test/java/com/c159251/a1/jtexteditor/testSave.txt"));
@@ -238,7 +285,7 @@ class EditorLauncherTest {
 
 
     @Test
-    @Order(13)
+    @Order(17)
     void saveToOdt(FxRobot robot) {
 
         editorController.setSelectedFile(new File("src/test/java/com/c159251/a1/jtexteditor/testSave.odt"));
@@ -255,7 +302,7 @@ class EditorLauncherTest {
     }
 
     @Test
-    @Order(14)
+    @Order(18)
     void saveToPdf(FxRobot robot) {
 
         editorController.setSelectedFile(new File("src/test/java/com/c159251/a1/jtexteditor/testSave.pdf"));
@@ -272,7 +319,7 @@ class EditorLauncherTest {
     }
 
     @Test
-    @Order(15)
+    @Order(19)
     void testWordCount() {
 
         Platform.runLater( () -> {
@@ -299,14 +346,14 @@ class EditorLauncherTest {
     }
 
     @Test
-    @Order(16)
+    @Order(20)
     void testNewFileStatus() {
         assertEquals("NEW FILE", editorController.getFileInfo());
         assertTrue(editorController.getStatusInfo().contains("Created"));
     }
 
     @Test
-    @Order(16)
+    @Order(21)
     void testNewFileChangedStatus(FxRobot robot) {
         robot.clickOn("#textPane");
         robot.write("Hello");
@@ -314,4 +361,17 @@ class EditorLauncherTest {
         assertTrue(editorController.getStatusInfo().contains("Not Yet Saved"));
     }
 
+    @Test
+    @Order(22)
+    void testAddTimeStamp(FxRobot robot) {
+        robot.clickOn("#timeStampBtn");
+        assertTrue(editorController.getTextPane().getText().contains(editorController.getTimeStamp()));
+
+    }
+
+    @Test
+    @Order(23)
+    void testTimerRunning() {
+        assertEquals(editorController.getTimerRunning(), Animation.Status.RUNNING);
+    }
 }

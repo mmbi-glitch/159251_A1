@@ -8,10 +8,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javafx.scene.text.Font;
-import org.snakeyaml.engine.v2.api.Dump;
-import org.snakeyaml.engine.v2.api.DumpSettings;
-import org.snakeyaml.engine.v2.api.Load;
-import org.snakeyaml.engine.v2.api.LoadSettings;
+import org.snakeyaml.engine.v2.api.*;
+import org.snakeyaml.engine.v2.common.ScalarStyle;
 
 public class Config {
 
@@ -25,10 +23,18 @@ public class Config {
     public Config() {
 
         Map<String, Object> configMap = loadConfigYaml();
-        this.username = (String) configMap.get("username");
-        this.fontSize = (int) configMap.get("fontSize");
-        this.textFont = (String) configMap.get("textFont");
-        this.codeFont = (String) configMap.get("codeFont");
+
+        if (!(configMap == null)) {
+            this.username = (String) configMap.get("username");
+            this.fontSize = (int) configMap.get("fontSize");
+            this.textFont = (String) configMap.get("textFont");
+            this.codeFont = (String) configMap.get("codeFont");
+        } else {
+            this.username = System.getenv("username");
+            this.fontSize = 12;
+            this.textFont = "Arial";
+            this.codeFont = "Consolas";
+        }
 
 
     }
@@ -47,6 +53,8 @@ public class Config {
 
             return (Map<String, Object>) load.loadFromInputStream(stream);
 
+        } catch (FileNotFoundException fnf) {
+            System.out.println("Config file not found, creating default");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -100,16 +108,15 @@ public class Config {
 
     private void saveConfigYaml() {
 
-        DumpSettings settings = DumpSettings.builder().build();
+        DumpSettings settings = DumpSettings.builder().setDefaultScalarStyle(ScalarStyle.DOUBLE_QUOTED).build();
         Dump dump = new Dump(settings);
         HashMap<String, Object> output = new HashMap<>();
-        output.put("codeFont", this.codeFont);
-        output.put("textFont", this.textFont);
-        output.put("fontSize", this.fontSize);
         output.put("username", this.username);
+        output.put("fontSize", this.fontSize);
+        output.put("textFont", this.textFont);
+        output.put("codeFont", this.codeFont);
 
         String outString = "#configuration\n" + dump.dumpToString(output);
-        System.out.println(outString);
 
         File outputFile = new File("src/main/Config/config.yaml");
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile))) {

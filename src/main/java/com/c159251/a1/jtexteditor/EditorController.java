@@ -3,6 +3,7 @@ package com.c159251.a1.jtexteditor;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -25,6 +26,7 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
+import org.controlsfx.control.action.Action;
 import org.odftoolkit.odfdom.doc.OdfTextDocument;
 import org.odftoolkit.odfdom.dom.element.office.OfficeTextElement;
 import org.odftoolkit.odfdom.incubator.doc.text.OdfTextExtractor;
@@ -671,7 +673,6 @@ public class EditorController {
 
     }
 
-
     public void editSettings(ActionEvent actionEvent) {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("configwindow-layout.fxml"));
         try {
@@ -685,7 +686,6 @@ public class EditorController {
             e.printStackTrace();
         }
 
-        setConfigs();
 
     }
 

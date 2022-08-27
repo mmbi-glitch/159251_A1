@@ -34,9 +34,9 @@ class EditorLauncherTest {
     public void start(Stage primaryStage) throws Exception {
         FXMLLoader fxmlLoader = new FXMLLoader(EditorLauncher.class.getResource("jtexteditor-layout.fxml"));
         Parent root = fxmlLoader.load();
+        systemClipboard = Clipboard.getSystemClipboard();
         editorController = fxmlLoader.getController();
         editorController.initialize();
-        systemClipboard = Clipboard.getSystemClipboard();
         Scene primaryScene = new Scene(root, 720, 480);
         primaryStage.setTitle("Simple Text Editor");
         primaryStage.setScene(primaryScene);
@@ -58,7 +58,7 @@ class EditorLauncherTest {
             }
         });
         WaitForAsyncUtils.waitForFxEvents();
-        Assertions.assertThat(editorController.getTextPane()).hasText("Testing in JavaFX is testing me.\n");
+        Assertions.assertThat(editorController.getTextPane().getText()).isEqualTo("Testing in JavaFX is testing me.\n");
     }
 
     @Test
@@ -72,7 +72,7 @@ class EditorLauncherTest {
             }
         });
         WaitForAsyncUtils.waitForFxEvents();
-        Assertions.assertThat(editorController.getTextPane()).hasText("Testing in JavaFX is testing me. \n");
+        Assertions.assertThat(editorController.getTextPane().getText()).isEqualTo("Testing in JavaFX is testing me. \n");
     }
 
     @Test
@@ -86,7 +86,7 @@ class EditorLauncherTest {
             }
         });
         WaitForAsyncUtils.waitForFxEvents();
-        Assertions.assertThat(editorController.getTextPane()).hasText("Testing in JavaFX is testing me.\n");
+        Assertions.assertThat(editorController.getTextPane().getText()).isEqualTo("Testing in JavaFX is testing me.\n");
     }
 
     // -------------------- new file and new window tests --------------------------- //
@@ -140,13 +140,8 @@ class EditorLauncherTest {
     @Test
     @Order(8)
     void copyText(FxRobot robot) {
-        Platform.runLater( () -> {
-            try {
-                editorController.loadTextFromTxtFile(new File("src/test/resources/basic_test.txt"));
-            } catch (Exception ignored) {
-
-            }
-        });
+        robot.clickOn("#textPane");
+        robot.write("Testing in JavaFX is testing me.");
         WaitForAsyncUtils.waitForFxEvents();
         editorController.getTextPane().selectRange(11, 17);
         robot.clickOn("#copyBtn");
@@ -156,39 +151,29 @@ class EditorLauncherTest {
     @Test
     @Order(9)
     void cutText(FxRobot robot) {
-        Platform.runLater( () -> {
-            try {
-                editorController.loadTextFromTxtFile(new File("src/test/resources/basic_test.txt"));
-            } catch (Exception ignored) {
-
-            }
-        });
+        robot.clickOn("#textPane");
+        robot.write("Testing in JavaFX is testing me.");
         WaitForAsyncUtils.waitForFxEvents();
         editorController.getTextPane().selectRange(11, 17);
         robot.clickOn("#cutBtn");
-        Assertions.assertThat(editorController.getTextPane()).hasText("Testing in  is testing me.\n");
+        Assertions.assertThat(editorController.getTextPane().getText()).isEqualTo("Testing in  is testing me.\n");
         Assertions.assertThat(editorController.getClipboardText()).isEqualTo("JavaFX");
     }
 
     @Test
     @Order(10)
     void copyAndPasteText(FxRobot robot) {
-        Platform.runLater( () -> {
-            try {
-                editorController.loadTextFromTxtFile(new File("src/test/resources/basic_test.txt"));
-            } catch (Exception ignored) {
-
-            }
-        });
+        robot.clickOn("#textPane");
+        robot.write("Testing in JavaFX is testing me.");
         WaitForAsyncUtils.waitForFxEvents();
         editorController.getTextPane().selectRange(11, 17);
         robot.clickOn("#copyBtn");
         WaitForAsyncUtils.waitForFxEvents();
         Assertions.assertThat(editorController.getClipboardText()).isEqualTo("JavaFX");
         robot.clickOn("#textPane");
-        editorController.getTextPane().positionCaret(17);
+        editorController.getTextPane().displaceCaret(17);
         robot.clickOn("#pasteBtn");
-        Assertions.assertThat(editorController.getTextPane()).hasText("Testing in JavaFXJavaFX is testing me.\n");
+        Assertions.assertThat(editorController.getTextPane().getText()).isEqualTo("Testing in JavaFXJavaFX is testing me.\n");
     }
 
     // ------------ searching text tests ---------------- //
@@ -196,13 +181,8 @@ class EditorLauncherTest {
     @Test
     @Order(11)
     void searchBlank(FxRobot robot) {
-        Platform.runLater( () -> {
-            try {
-                editorController.loadTextFromTxtFile(new File("src/test/resources/basic_test.txt"));
-            } catch (Exception ignored) {
-
-            }
-        });
+        robot.clickOn("#textPane");
+        robot.write("Testing in JavaFX is testing me.");
         WaitForAsyncUtils.waitForFxEvents();
         robot.clickOn("#searchBtn");
         robot.clickOn("#searchField");
@@ -324,7 +304,7 @@ class EditorLauncherTest {
 
         Platform.runLater( () -> {
             try {
-                editorController.getTextPane().setText("Testing PDF file");
+                editorController.getTextPane().replaceText("Testing PDF file");
             } catch (Exception ignored) {
 
             }
@@ -334,7 +314,7 @@ class EditorLauncherTest {
 
         Platform.runLater( () -> {
             try {
-                editorController.getTextPane().setText("Testing PDF file Again");
+                editorController.getTextPane().replaceText("Testing PDF file Again");
             } catch (Exception ignored) {
 
             }

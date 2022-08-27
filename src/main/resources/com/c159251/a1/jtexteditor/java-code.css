@@ -1,0 +1,49 @@
+.keyword {
+    -fx-fill: rgb(0, 119, 170);
+}
+
+.annotation {
+    -fx-fill: rgb(255,140,0);
+}
+
+.function {
+    -fx-fill: purple !important;
+}
+
+.capword {
+    -fx-fill: rgb(221, 74, 104);
+}
+
+.number, .library {
+    -fx-fill: rgb(255,140,0);
+}
+
+.paren {
+    -fx-fill: firebrick;
+}
+.bracket {
+    -fx-fill: darkgreen;
+}
+.brace {
+    -fx-fill: teal;
+}
+.string {
+    -fx-fill: rgb(102, 153, 0);
+}
+
+.comment {
+	-fx-fill: rgb(112, 128, 144);
+    -fx-font-style: italic;
+}
+
+
+.paragraph-box {
+    -fx-font-weight: bold;
+    -fx-background-color: #f2f9fc;
+}
+
+.paragraph-text {
+    -fx-font-family: consolas;
+    -fx-font-size: 11pt;
+    -fx-tab-size: 4;
+}

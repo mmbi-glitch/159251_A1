@@ -7,6 +7,9 @@ import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
+import javafx.application.Platform;
+import javafx.concurrent.ScheduledService;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.print.PageLayout;
@@ -27,6 +30,10 @@ import javafx.util.Duration;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.controlsfx.control.action.Action;
+import org.fxmisc.richtext.CodeArea;
+import org.fxmisc.richtext.LineNumberFactory;
+import org.fxmisc.richtext.model.StyleSpans;
+import org.fxmisc.richtext.model.StyleSpansBuilder;
 import org.odftoolkit.odfdom.doc.OdfTextDocument;
 import org.odftoolkit.odfdom.dom.element.office.OfficeTextElement;
 import org.odftoolkit.odfdom.incubator.doc.text.OdfTextExtractor;
@@ -36,12 +43,13 @@ import org.w3c.dom.Node;
 import com.itextpdf.kernel.pdf.*;
 import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.Paragraph;
-
 import java.text.SimpleDateFormat;
 import java.util.*;
-
 import java.io.*;
 import java.util.Objects;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /** This class is connected with the fxml config file and is responsible for the main program logic. **/
 
@@ -52,6 +60,8 @@ public class EditorController {
     @FXML
     private Menu fileMenu;
     @FXML
+    private CodeArea textPane;
+    @FXML
     private Button timeStampBtn;
     private String timeStamp;
     @FXML
@@ -60,6 +70,7 @@ public class EditorController {
     private Button searchForNextBtn;
 
     private File selectedFile;
+    private File selectedFileExtension;
     private Clipboard systemClipboard;
     private String clipboardText;
     private int elapsedSeconds;
@@ -83,8 +94,6 @@ public class EditorController {
     @FXML
     private MenuItem saveFileAs;
     @FXML
-    private TextArea textPane;
-    @FXML
     private Button cutBtn;
     @FXML
     private Button copyBtn;
@@ -99,23 +108,26 @@ public class EditorController {
     @FXML
     private Label searchMatches;
 
-    private SimpleDateFormat dateformatter = new SimpleDateFormat("HH:mm dd/MM/yy");
+    private Scene currentScene;
+
+    private final SimpleDateFormat dateFormatter = new SimpleDateFormat("HH:mm dd/MM/yyyy");
 
     private int searchCount;
     private int selectCount;
-    ArrayList<Integer> selectFrom;
-    ArrayList<Integer> selectTo;
+    private ArrayList<Integer> selectFrom;
+    private ArrayList<Integer> selectTo;
 
-    Timeline secondsTimer = new Timeline(new KeyFrame(
+    private Timeline secondsTimer = new Timeline(new KeyFrame(
             Duration.millis(1000),
             ae -> setTimerText()));
 
     private YesNoCancel alert;
 
 
+
     // ---------------------------- initializing method --------------------------------------- /
-    @FXML
-    public void initialize() {
+
+    protected void initialize() {
         systemClipboard = Clipboard.getSystemClipboard();
         // config applies details
         System.out.println(CONFIG.toString());
@@ -125,20 +137,20 @@ public class EditorController {
         searchBar.setVisible(false);
         selectFrom = new ArrayList<>();
         selectTo = new ArrayList<>();
-
         wordCounts.setText("Words 0:0 Chars");
         timer.setText("00:00:00");
         secondsTimer.setCycleCount(Animation.INDEFINITE);
         secondsTimer.play();
         setNewStatus();
-        //set up listener for textbox changes
-        textPane.textProperty().addListener(new ChangeListener<String>() {
-            @Override
-            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-                setChangedStatus();
-                setWordCountLabel();
-            }
+
+        //set up listener for text pane changes
+        textPane.textProperty().addListener((observable, oldValue, newValue) -> {
+            applyHighlighting();
+            setChangedStatus();
+            setWordCountLabel();
         });
+        textPane.setParagraphGraphicFactory(LineNumberFactory.get(textPane));
+        textPane.getStylesheets().add(EditorLauncher.class.getResource("java-code.css").toExternalForm());
     }
 
     // ---------------------------- getters ----------------------------------- //
@@ -160,10 +172,8 @@ public class EditorController {
     }
 
     public void setTitle(String newFileName) {
-
         Stage thisStage = (Stage) textPane.getScene().getWindow();
-        thisStage.setTitle(newFileName + " - Simple Text Editor");
-
+        thisStage.setTitle(newFileName + " - JText Editor");
     }
 
     public static Config getCONFIG() { return EditorController.CONFIG; }
@@ -180,7 +190,7 @@ public class EditorController {
         return timeStamp;
     }
 
-    public Config getConfig() { return this.CONFIG; }
+
 
     public javafx.scene.Node getYesBtn() {
         return alert.getDialogPane().lookupButton(ButtonType.YES);
@@ -221,6 +231,9 @@ public class EditorController {
                 }
             });
         }
+        else {
+            textPane.clear();
+        }
     }
 
     // this should open a new program window
@@ -239,12 +252,27 @@ public class EditorController {
 
     @FXML
     protected void onFileClose() {
-        System.exit(0);
+        //add test for unsaved
+        if(changesMade) {
+            alert = new YesNoCancel();
+            alert.setHeaderText("Do you want to save before exiting?");
+            alert.showAndWait().ifPresent(response -> {
+                if(Objects.equals(response, ButtonType.YES)) {
+                    onFileSave();
+                }
+                if(!Objects.equals(response, ButtonType.CANCEL)) {
+                    Stage.getWindows().get(Stage.getWindows().size() - 1).hide();
+                }
+            });
+        }
+        else {
+            Stage.getWindows().get(Stage.getWindows().size() - 1).hide();
+        }
     }
 
 
     @FXML
-    public void onFileOpen() {
+    protected void onFileOpen() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter("Plain Text (*.txt)", "*.txt"),
@@ -278,8 +306,7 @@ public class EditorController {
             PDFTextStripper extractor = new PDFTextStripper();
             String fileToText = extractor.getText(document);
             if (!fileToText.isBlank()) {
-//                textPane.setText(formatter.format(new Date()));
-                textPane.setText(fileToText);
+                textPane.replaceText(fileToText);
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -299,8 +326,7 @@ public class EditorController {
                 element = root.getFirstChildElement();
             }
             if (!fileToText.toString().isBlank()) {
-//                textPane.setText(formatter.format(new Date()));
-                textPane.setText(fileToText.toString());
+                textPane.replaceText(fileToText.toString());
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -334,63 +360,100 @@ public class EditorController {
 
 
     //setChangesMade sets a flag to show changes have been made, and closing without saving will lose changes
-    void setChangedStatus() {
+    protected void setChangedStatus() {
         this.changesMade = true;
 
-        if(selectedFile == null){
-            this.saveStatus.setText("Not Yet Saved - created " + dateformatter.format(saveTime));
+        if(selectedFile == null) {
+            this.saveStatus.setText("Not Yet Saved - created " + dateFormatter.format(saveTime));
         } else {
-            this.saveStatus.setText("Unsaved Changes - last saved " + dateformatter.format(saveTime));
+            this.saveStatus.setText("Unsaved Changes - last saved " + dateFormatter.format(saveTime));
         }
 
     }
 
     //sets the text on the timer from window open
-    void setTimerText() {
+    protected void setTimerText() {
         elapsedSeconds += 1;
         timer.setText(String.format("%02d:%02d:%02d",(elapsedSeconds/3600),(elapsedSeconds % 3600) / 60,elapsedSeconds % 60));
     }
 
     //sets flag to show that no changes have been made, and it is safe to close without losing work
-    void setSavedStatus () {
+    protected void setSavedStatus() {
         setUnchangedFlags();
-        this.saveStatus.setText("Saved at " + dateformatter.format(saveTime));
+        this.saveStatus.setText("Saved at " + dateFormatter.format(saveTime));
+        setTitle(selectedFile.getName());
     }
 
-    void setNewStatus () {
+    protected void setNewStatus() {
         setUnchangedFlags();
-        this.saveStatus.setText("Created at " + dateformatter.format(saveTime));
+        this.saveStatus.setText("Created at " + dateFormatter.format(saveTime));
     }
 
-    void setOpenStatus () {
+    protected void setOpenStatus() {
         setUnchangedFlags();
-        this.saveStatus.setText("Opened at " + dateformatter.format(saveTime));
+        this.saveStatus.setText("Opened at " + dateFormatter.format(saveTime));
+        setTitle(selectedFile.getName());
     }
 
-    void setUnchangedFlags() {
+    protected void setUnchangedFlags() {
         this.saveTime = new Date();
         this.changesMade = false;
     }
 
-    void setWordCountLabel() {
+    protected void setWordCountLabel() {
         wordCounts.setText(countWords());
     }
 
-    String countWords() {
-        return "Words " + textPane.getText().split(" ").length + ":" + textPane.getText().length() + " Chars";
+    protected String countWords() {
+        return "Words " + textPane.getText().split("\\s+").length + ":" + textPane.getText().length() + " Chars";
     }
 
-    // ------------------------- EDIT MENU & BUTTON cut/copy/paste/search methods -------------------------- /
+    // -------------------------- Syntax Highlighting Updater ---------------- //
 
-    public void addTimeStamp() {
-
-        timeStamp = dateformatter.format(new Date());
-        textPane.setText(timeStamp + "\n\n" + textPane.getText());
-
-
+    protected void applyHighlighting() {
+        String text = textPane.getText();
+        StyleSpans<Collection<String>> styledText = computeHighlighting(text, SyntaxHighlighter.JAVA_PATTERN);
+        textPane.setStyleSpans(0, styledText);
     }
 
-    public void cutText() {
+    private static StyleSpans<Collection<String>> computeHighlighting(String text, Pattern pattern) {
+        Matcher matcher = pattern.matcher(text);
+        int lastKwEnd = 0;
+        StyleSpansBuilder<Collection<String>> spansBuilder
+                = new StyleSpansBuilder<>();
+        while(matcher.find()) {
+            String styleClass =
+                    matcher.group("KEYWORD") != null ? "keyword" :
+                        matcher.group("FUNCTION") != null ? "function" :
+                            matcher.group("CAPWORD") != null ? "capword" :
+                                matcher.group("LIBRARY") != null ? "library" :
+                                    matcher.group("ANNOTATION") != null ? "annotation" :
+//                                        matcher.group("NUMBER") != null ? "number" :
+                                            matcher.group("PAREN") != null ? "paren" :
+                                                matcher.group("BRACE") != null ? "brace" :
+                                                    matcher.group("BRACKET") != null ? "bracket" :
+                                                        matcher.group("SEMICOLON") != null ? "semicolon" :
+                                                            matcher.group("STRING") != null ? "string" :
+                                                                matcher.group("COMMENT") != null ? "comment" :
+                    null; /* never happens */ assert styleClass != null;
+            spansBuilder.add(Collections.emptyList(), matcher.start() - lastKwEnd);
+            spansBuilder.add(Collections.singleton(styleClass), matcher.end() - matcher.start());
+            lastKwEnd = matcher.end();
+        }
+        spansBuilder.add(Collections.emptyList(), text.length() - lastKwEnd);
+        return spansBuilder.create();
+    }
+
+    // ------------------------- EDIT MENU & BUTTON cut/copy/paste/search/datetime methods -------------------------- /
+
+    @FXML
+    protected void addTimeStamp() {
+        timeStamp = dateFormatter.format(new Date());
+        textPane.replaceText(timeStamp + "\n\n" + textPane.getText());
+    }
+
+    @FXML
+    protected void cutText() {
         ClipboardContent content = new ClipboardContent();
         String text = textPane.getSelectedText();
         //fixing this particular action, it needs the anchor value (anchor and caretPosition make up the selection range)
@@ -404,14 +467,16 @@ public class EditorController {
     }
 
 
-    public void copyText() {
+    @FXML
+    protected void copyText() {
         ClipboardContent content = new ClipboardContent();
         content.putString(textPane.getSelectedText());
         systemClipboard.setContent(content);
         clipboardText = systemClipboard.getString();
     }
 
-    public void pasteText() {
+    @FXML
+    protected void pasteText() {
         if (!systemClipboard.getString().isBlank()) {
             // fixing paste issue where the caret position keeps moving
             int caretPos = textPane.getCaretPosition(); // storing the caret position
@@ -421,12 +486,14 @@ public class EditorController {
         }
     }
 
-    public void searchText() {
+    @FXML
+    protected void searchText() {
         searchBar.setManaged(true);
         searchBar.setVisible(true);
     }
 
-    public void onSearchTextChanged() {
+    @FXML
+    protected void onSearchTextChanged() {
         String searchedText = searchField.getText();
         // first, the text could be blank, so we deal with that issue first
         if (searchedText.isBlank()) {
@@ -439,7 +506,7 @@ public class EditorController {
 
         // init vars here
         searchCount = 0;
-        int searchFrom = 0;
+        int searchFrom; //removed the initialisation on intelliJ recommendation
         int searchTo = textPane.getText().length();
         selectFrom.clear();
         selectTo.clear();
@@ -477,7 +544,8 @@ public class EditorController {
         }
     }
 
-    public void searchForNext() {
+    @FXML
+    protected void searchForNext() {
         selectCount++;
         if (selectCount == searchCount) {
             selectCount = 0;
@@ -488,7 +556,8 @@ public class EditorController {
         }
     }
 
-    public void searchForPrevious() {
+    @FXML
+    protected void searchForPrevious() {
         selectCount--;
         if (selectCount == -1) {
             selectCount = searchCount - 1;
@@ -499,7 +568,8 @@ public class EditorController {
         }
     }
 
-    public void closeSearch() {
+    @FXML
+    protected void closeSearch() {
         searchBar.setManaged(false);
         searchBar.setVisible(false);
     }
@@ -507,11 +577,11 @@ public class EditorController {
 
     // ---------------------------- FILE MENU save and save as methods ------------------------------------ /
 
-    File getSelectedFile() {
+    protected File getSelectedFile() {
         return this.selectedFile;
     }
 
-    void setSelectedFile(File file) {
+    protected void setSelectedFile(File file) {
         this.selectedFile = file;
     }
 
@@ -531,6 +601,7 @@ public class EditorController {
         setSavedStatus();
         saveTextToTxtFile(selectedFile);
     }
+
 
     @FXML
     protected void onFileSaveAs() {
@@ -565,7 +636,7 @@ public class EditorController {
 
     // ---------------------------- 'saving text to file' methods --------------------------------------- /
 
-    public void saveTextToPdfFile(File fileToSave) {
+    protected void saveTextToPdfFile(File fileToSave) {
         if (!textPane.getText().isBlank()) {
             try (PdfDocument pdf = new PdfDocument(new PdfWriter(fileToSave))) {
                 Document doc = new Document(pdf);
@@ -577,7 +648,7 @@ public class EditorController {
         }
     }
 
-    public void saveTextToOdtFile(File fileToSave) {
+    protected void saveTextToOdtFile(File fileToSave) {
         if (!textPane.getText().isBlank()) {
             try (OdfTextDocument document = OdfTextDocument.newTextDocument()) {
                 OfficeTextElement officeText = document.getContentRoot();
@@ -597,7 +668,7 @@ public class EditorController {
         }
     }
 
-    public void saveTextToTxtFile(File fileToSave) {
+    protected void saveTextToTxtFile(File fileToSave) {
         //if the text is not blank, then write text to file
         if (!textPane.getText().isBlank()) {
             try (BufferedWriter fileWriter = new BufferedWriter(new FileWriter(fileToSave))) {

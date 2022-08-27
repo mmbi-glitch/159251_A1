@@ -19,8 +19,8 @@ module com.c159251.a1.jtexteditor {
     requires javafx.web;
     requires org.snakeyaml.engine.v2;
 
+    requires org.fxmisc.richtext;
 
     opens com.c159251.a1.jtexteditor to javafx.fxml;
     exports com.c159251.a1.jtexteditor;
-
 }

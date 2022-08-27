@@ -17,7 +17,7 @@ module com.c159251.a1.jtexteditor {
     requires layout;
     requires org.apache.commons.lang3;
     requires javafx.web;
-    requires snakeyaml;
+    requires org.snakeyaml.engine.v2;
 
 
     opens com.c159251.a1.jtexteditor to javafx.fxml;

@@ -17,6 +17,7 @@ import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.stage.FileChooser;
@@ -34,9 +35,7 @@ import org.w3c.dom.Node;
 import com.itextpdf.kernel.pdf.*;
 import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.Paragraph;
-import org.yaml.snakeyaml.Yaml;
 
-import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -47,6 +46,8 @@ import java.util.Objects;
 
 public class EditorController {
 
+    @FXML
+    public Button settingsButton;
     @FXML
     private Menu fileMenu;
     @FXML
@@ -64,7 +65,7 @@ public class EditorController {
     private Boolean changesMade;
     private Date saveTime;
 
-    private Config config;
+    private final Config config = new Config();
 
 
     @FXML
@@ -112,12 +113,13 @@ public class EditorController {
     private YesNoCancel alert;
 
 
-
     // ---------------------------- initializing method --------------------------------------- /
     @FXML
     public void initialize() {
         systemClipboard = Clipboard.getSystemClipboard();
-        // append date and time to text pane moved to a function
+        // config applies details
+        System.out.println(config.toString());
+        this.setConfigs();
 
         searchBar.setManaged(false);
         searchBar.setVisible(false);
@@ -178,7 +180,7 @@ public class EditorController {
         return timeStamp;
     }
 
-
+    public Config getConfig() { return this.config; }
 
     public javafx.scene.Node getYesBtn() {
         return alert.getDialogPane().lookupButton(ButtonType.YES);
@@ -659,6 +661,31 @@ public class EditorController {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+
+    }
+
+    // --------------------------------- config application  -------------------------//
+
+    private void setConfigs() {
+
+        textPane.setFont(config.getTextFont());
+
+    }
+
+
+    public void editSettings(ActionEvent actionEvent) {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("configwindow-layout.fxml"));
+        try {
+            Parent root = loader.load();
+            Stage stageAbout = new Stage();
+            stageAbout.setTitle("Configuration");
+            stageAbout.setScene(new Scene(root,486,212));
+            stageAbout.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
 
 
     }

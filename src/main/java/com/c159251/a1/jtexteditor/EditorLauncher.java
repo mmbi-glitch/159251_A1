@@ -9,7 +9,6 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.ButtonType;
 import javafx.stage.Stage;
-import org.yaml.snakeyaml.Yaml;
 
 import java.io.InputStream;
 import java.util.Map;
@@ -20,6 +19,7 @@ import java.io.File;
 /** This class is solely responsible for launching the Application window. **/
 
 public class EditorLauncher extends Application {
+
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -36,16 +36,8 @@ public class EditorLauncher extends Application {
     }
 
     public static void main(String[] args) {
-        Platform.runLater(EditorLauncher::getYaml);
         launch();
     }
 
 
-
-    public static void getYaml() {
-        Yaml config = new Yaml();
-        InputStream inputStream = EditorLauncher.class.getClassLoader().getResourceAsStream("com/c159251/a1/jtexteditor/config.yaml");
-        Map<String,Object> obj = config.load(inputStream);
-        System.out.println(obj);
-    }
 }

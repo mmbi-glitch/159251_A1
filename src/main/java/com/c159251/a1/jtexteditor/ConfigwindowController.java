@@ -33,14 +33,14 @@ public class ConfigwindowController {
     @FXML
     void initialize() {
 
-        userName.setText("Robert");
-        fontSize.setText("12");
-        fontSizeSlider.adjustValue(12.0);
+        userName.setText(EditorController.getCONFIG().getUsername());
+        fontSize.setText(String.valueOf(EditorController.getCONFIG().getFontSize()));
+        fontSizeSlider.adjustValue((double) EditorController.getCONFIG().getFontSize());
 
         textFontCombo.setItems(FXCollections.observableList(Font.getFamilies()));
-        textFontCombo.setValue("Arial");
+        textFontCombo.setValue(EditorController.getCONFIG().getTextFont().getFamily());
         codeFontCombo.setItems(FXCollections.observableList(Font.getFamilies()));
-        codeFontCombo.setValue("Courier");
+        codeFontCombo.setValue(EditorController.getCONFIG().getCodeFont().getFamily());
 
         fontSizeSlider.valueProperty().addListener(new ChangeListener<Number>() {
             @Override
@@ -53,6 +53,7 @@ public class ConfigwindowController {
 
     public void setConfig(ActionEvent actionEvent) {
 
+        EditorController.getCONFIG().updateConfig(userName.getText(),Integer.parseInt(fontSize.getText()),textFontCombo.getValue(),codeFontCombo.getValue());
         Stage stage = (Stage) textFontCombo.getScene().getWindow();
         stage.close();
 
@@ -65,6 +66,4 @@ public class ConfigwindowController {
 
     }
 
-    public void updateSlider(KeyEvent keyEvent) {
-    }
 }

@@ -17,7 +17,6 @@ import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.stage.FileChooser;
@@ -65,8 +64,7 @@ public class EditorController {
     private Boolean changesMade;
     private Date saveTime;
 
-    private final Config config = new Config();
-
+    private static Config CONFIG = new Config();
 
     @FXML
     private Label wordCounts;
@@ -118,7 +116,7 @@ public class EditorController {
     public void initialize() {
         systemClipboard = Clipboard.getSystemClipboard();
         // config applies details
-        System.out.println(config.toString());
+        System.out.println(CONFIG.toString());
         this.setConfigs();
 
         searchBar.setManaged(false);
@@ -166,7 +164,7 @@ public class EditorController {
 
     }
 
-
+    public static Config getCONFIG() { return EditorController.CONFIG; }
 
     public String getStatusInfo() {
         return saveStatus.getText();
@@ -180,7 +178,7 @@ public class EditorController {
         return timeStamp;
     }
 
-    public Config getConfig() { return this.config; }
+    public Config getConfig() { return this.CONFIG; }
 
     public javafx.scene.Node getYesBtn() {
         return alert.getDialogPane().lookupButton(ButtonType.YES);
@@ -669,7 +667,7 @@ public class EditorController {
 
     private void setConfigs() {
 
-        textPane.setFont(config.getTextFont());
+        textPane.setFont(CONFIG.getTextFont());
 
     }
 
@@ -682,11 +680,12 @@ public class EditorController {
             stageAbout.setTitle("Configuration");
             stageAbout.setScene(new Scene(root,486,212));
             stageAbout.show();
+
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-
+        setConfigs();
 
     }
 

@@ -27,7 +27,7 @@
            <Label layoutX="27.0" layoutY="29.0" text="User Name" />
            <TextField fx:id="userName" layoutX="102.0" layoutY="25.0" prefHeight="25.0" prefWidth="347.0" />
            <Label layoutX="27.0" layoutY="66.0" text="Font Size" />
-           <TextField fx:id="fontSize" layoutX="102.0" layoutY="62.0" onKeyTyped="#updateSlider" prefHeight="25.0" prefWidth="31.0" />
+           <TextField fx:id="fontSize" editable="false" layoutX="102.0" layoutY="62.0" prefHeight="25.0" prefWidth="31.0" />
            <Slider fx:id="fontSizeSlider" blockIncrement="1.0" layoutX="141.0" layoutY="68.0" max="50.0" min="5.0" prefHeight="14.0" prefWidth="308.0" value="12.0" />
            <Label layoutX="27.0" layoutY="100.0" text="Text Font" />
            <ComboBox fx:id="textFontCombo" layoutX="102.0" layoutY="96.0" prefWidth="150.0" />

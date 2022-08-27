@@ -1,5 +1,5 @@
 #configuration
 "codeFont": "Consolas"
-"fontSize": !!int "19"
+"fontSize": !!int "30"
 "textFont": "Arial Black"
 "username": "Robert Simpson"

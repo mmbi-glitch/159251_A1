@@ -670,7 +670,6 @@ public class EditorController {
     private void setConfigs() {
 
         textPane.setFont(CONFIG.getTextFont());
-
     }
 
     public void editSettings(ActionEvent actionEvent) {

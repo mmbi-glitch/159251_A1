@@ -9,7 +9,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
@@ -35,19 +34,14 @@ public class ConfigwindowController {
 
         userName.setText(EditorController.getCONFIG().getUsername());
         fontSize.setText(String.valueOf(EditorController.getCONFIG().getFontSize()));
-        fontSizeSlider.adjustValue((double) EditorController.getCONFIG().getFontSize());
+        fontSizeSlider.adjustValue(EditorController.getCONFIG().getFontSize());
 
         textFontCombo.setItems(FXCollections.observableList(Font.getFamilies()));
         textFontCombo.setValue(EditorController.getCONFIG().getTextFont().getFamily());
         codeFontCombo.setItems(FXCollections.observableList(Font.getFamilies()));
         codeFontCombo.setValue(EditorController.getCONFIG().getCodeFont().getFamily());
 
-        fontSizeSlider.valueProperty().addListener(new ChangeListener<Number>() {
-            @Override
-            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-                fontSize.setText(String.valueOf(newValue.intValue()));
-            }
-        });
+        fontSizeSlider.valueProperty().addListener((observable, oldValue, newValue) -> fontSize.setText(String.valueOf(newValue.intValue())));
 
     }
 

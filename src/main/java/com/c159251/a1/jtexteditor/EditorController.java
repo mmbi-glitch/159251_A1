@@ -679,7 +679,8 @@ public class EditorController {
             Stage stageAbout = new Stage();
             stageAbout.setTitle("Configuration");
             stageAbout.setScene(new Scene(root,486,212));
-            stageAbout.show();
+            stageAbout.showAndWait();
+            setConfigs();
 
         } catch (IOException e) {
             e.printStackTrace();

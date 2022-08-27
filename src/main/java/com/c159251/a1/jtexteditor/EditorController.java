@@ -3,6 +3,9 @@ package com.c159251.a1.jtexteditor;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.application.Platform;
+import javafx.concurrent.ScheduledService;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.print.PageLayout;
@@ -22,6 +25,10 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
+import org.fxmisc.richtext.CodeArea;
+import org.fxmisc.richtext.LineNumberFactory;
+import org.fxmisc.richtext.model.StyleSpans;
+import org.fxmisc.richtext.model.StyleSpansBuilder;
 import org.odftoolkit.odfdom.doc.OdfTextDocument;
 import org.odftoolkit.odfdom.dom.element.office.OfficeTextElement;
 import org.odftoolkit.odfdom.incubator.doc.text.OdfTextExtractor;
@@ -35,6 +42,9 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.io.*;
 import java.util.Objects;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /** This class is connected with the fxml config file and is responsible for the main program logic. **/
 
@@ -42,6 +52,8 @@ public class EditorController {
 
     @FXML
     private Menu fileMenu;
+    @FXML
+    private CodeArea textPane;
     @FXML
     private Button timeStampBtn;
     private String timeStamp;
@@ -51,6 +63,7 @@ public class EditorController {
     private Button searchForNextBtn;
 
     private File selectedFile;
+    private File selectedFileExtension;
     private Clipboard systemClipboard;
     private String clipboardText;
     private int elapsedSeconds;
@@ -71,8 +84,6 @@ public class EditorController {
     @FXML
     private MenuItem saveFileAs;
     @FXML
-    private TextArea textPane;
-    @FXML
     private Button cutBtn;
     @FXML
     private Button copyBtn;
@@ -87,6 +98,8 @@ public class EditorController {
     @FXML
     private Label searchMatches;
 
+    private Scene currentScene;
+
     private final SimpleDateFormat dateFormatter = new SimpleDateFormat("HH:mm dd/MM/yyyy");
 
     private int searchCount;
@@ -100,14 +113,11 @@ public class EditorController {
 
     private YesNoCancel alert;
 
-
-
     // ---------------------------- initializing method --------------------------------------- /
 
     protected void initialize() {
         systemClipboard = Clipboard.getSystemClipboard();
         // append date and time to text pane moved to a function
-
         searchBar.setManaged(false);
         searchBar.setVisible(false);
         selectFrom = new ArrayList<>();
@@ -119,9 +129,12 @@ public class EditorController {
         setNewStatus();
         //set up listener for text pane changes
         textPane.textProperty().addListener((observable, oldValue, newValue) -> {
+            applyHighlighting();
             setChangedStatus();
             setWordCountLabel();
         });
+        textPane.setParagraphGraphicFactory(LineNumberFactory.get(textPane));
+        textPane.getStylesheets().add(EditorLauncher.class.getResource("java-code.css").toExternalForm());
     }
 
     // ---------------------------- getters ----------------------------------- //
@@ -130,7 +143,7 @@ public class EditorController {
         return clipboardText;
     }
 
-    public TextArea getTextPane() {
+    public CodeArea getTextPane() {
         return textPane;
     }
 
@@ -145,7 +158,6 @@ public class EditorController {
     public void setTitle(String newFileName) {
         Stage thisStage = (Stage) textPane.getScene().getWindow();
         thisStage.setTitle(newFileName + " - JText Editor");
-
     }
 
     public String getStatusInfo() {
@@ -201,6 +213,9 @@ public class EditorController {
                 }
             });
         }
+        else {
+            textPane.clear();
+        }
     }
 
     // this should open a new program window
@@ -244,8 +259,9 @@ public class EditorController {
         fileChooser.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter("Plain Text (*.txt)", "*.txt"),
                 new FileChooser.ExtensionFilter("OpenDocument Text (*.odt)", "*.odt"),
-                new FileChooser.ExtensionFilter("PDF (*.pdf)", "*.pdf")
-        );
+                new FileChooser.ExtensionFilter("PDF (*.pdf)", "*.pdf"),
+                new FileChooser.ExtensionFilter("Code Files (*.java, *.cpp)", "*.java", "*.cpp")
+                );
         fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
         selectedFile = fileChooser.showOpenDialog(null);
         if (selectedFile != null) {
@@ -273,7 +289,7 @@ public class EditorController {
             PDFTextStripper extractor = new PDFTextStripper();
             String fileToText = extractor.getText(document);
             if (!fileToText.isBlank()) {
-                textPane.setText(fileToText);
+                textPane.replaceText(fileToText);
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -293,7 +309,7 @@ public class EditorController {
                 element = root.getFirstChildElement();
             }
             if (!fileToText.toString().isBlank()) {
-                textPane.setText(fileToText.toString());
+                textPane.replaceText(fileToText.toString());
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -313,9 +329,8 @@ public class EditorController {
             }
             // if successfully loaded, populate textPane with file text
             if (!fileToText.isEmpty()) {
-                textPane.setText(fileToText.toString());
+                textPane.replaceText(fileToText.toString());
             }
-
         }
         catch (IOException e) {
             e.printStackTrace();
@@ -375,12 +390,48 @@ public class EditorController {
         return "Words " + textPane.getText().split("\\s+").length + ":" + textPane.getText().length() + " Chars";
     }
 
+    // -------------------------- Syntax Highlighting Updater ---------------- //
+
+    protected void applyHighlighting() {
+        String text = textPane.getText();
+        StyleSpans<Collection<String>> styledText = computeHighlighting(text, SyntaxHighlighter.JAVA_PATTERN);
+        textPane.setStyleSpans(0, styledText);
+    }
+
+    private static StyleSpans<Collection<String>> computeHighlighting(String text, Pattern pattern) {
+        Matcher matcher = pattern.matcher(text);
+        int lastKwEnd = 0;
+        StyleSpansBuilder<Collection<String>> spansBuilder
+                = new StyleSpansBuilder<>();
+        while(matcher.find()) {
+            String styleClass =
+                    matcher.group("KEYWORD") != null ? "keyword" :
+                        matcher.group("FUNCTION") != null ? "function" :
+                            matcher.group("CAPWORD") != null ? "capword" :
+                                matcher.group("LIBRARY") != null ? "library" :
+                                    matcher.group("ANNOTATION") != null ? "annotation" :
+//                                        matcher.group("NUMBER") != null ? "number" :
+                                            matcher.group("PAREN") != null ? "paren" :
+                                                matcher.group("BRACE") != null ? "brace" :
+                                                    matcher.group("BRACKET") != null ? "bracket" :
+                                                        matcher.group("SEMICOLON") != null ? "semicolon" :
+                                                            matcher.group("STRING") != null ? "string" :
+                                                                matcher.group("COMMENT") != null ? "comment" :
+                    null; /* never happens */ assert styleClass != null;
+            spansBuilder.add(Collections.emptyList(), matcher.start() - lastKwEnd);
+            spansBuilder.add(Collections.singleton(styleClass), matcher.end() - matcher.start());
+            lastKwEnd = matcher.end();
+        }
+        spansBuilder.add(Collections.emptyList(), text.length() - lastKwEnd);
+        return spansBuilder.create();
+    }
+
     // ------------------------- EDIT MENU & BUTTON cut/copy/paste/search/datetime methods -------------------------- /
 
     @FXML
     protected void addTimeStamp() {
         timeStamp = dateFormatter.format(new Date());
-        textPane.setText(timeStamp + "\n\n" + textPane.getText());
+        textPane.replaceText(timeStamp + "\n\n" + textPane.getText());
     }
 
     @FXML
@@ -413,7 +464,7 @@ public class EditorController {
             int caretPos = textPane.getCaretPosition(); // storing the caret position
             textPane.insertText(caretPos, systemClipboard.getString());
             onSearchTextChanged(); // this function messes with the caret position
-            textPane.positionCaret(caretPos + systemClipboard.getString().length()); // resetting the caret position
+            textPane.displaceCaret(caretPos + systemClipboard.getString().length()); // resetting the caret position
         }
     }
 

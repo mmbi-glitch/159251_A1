@@ -1,0 +1,39 @@
+.keyword {
+    -fx-fill: rgb(109,113,46);
+}
+
+.number {
+    -fx-fill: green;
+}
+
+.function {
+    -fx-fill:  rgb(0,80,181);
+}
+
+.bracket {
+    -fx-fill: darkgreen;
+}
+
+.brace {
+    -fx-fill: teal;
+}
+
+.string, .library {
+    -fx-fill: firebrick;
+}
+
+.comment {
+    -fx-fill: green;
+}
+
+
+.paragraph-box {
+    -fx-font-weight: bold;
+    -fx-background-color: #f2f9fc;
+}
+
+.paragraph-text {
+    -fx-font-family: consolas;
+    -fx-font-size: 11pt;
+    -fx-tab-size: 4;
+}

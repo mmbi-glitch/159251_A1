@@ -28,8 +28,8 @@ public class EditorLauncher extends Application {
                 if(Objects.equals(response, ButtonType.YES)) {
                     editorController.onFileSave();
                 }
-                if(!Objects.equals(response, ButtonType.CANCEL)) {
-                    Stage.getWindows().get(Stage.getWindows().size() - 1).hide();
+                if (Objects.equals(response, ButtonType.CANCEL)) {
+                    e.consume();
                 }
             });
         });

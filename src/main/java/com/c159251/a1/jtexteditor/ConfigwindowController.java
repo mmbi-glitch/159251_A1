@@ -5,10 +5,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Slider;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
@@ -28,6 +25,8 @@ public class ConfigwindowController {
     public ComboBox<String> textFontCombo;
     @FXML
     public ComboBox<String> codeFontCombo;
+    @FXML
+    public ListView themesList;
 
     @FXML
     void initialize() {
@@ -41,7 +40,11 @@ public class ConfigwindowController {
         codeFontCombo.setItems(FXCollections.observableList(Font.getFamilies()));
         codeFontCombo.setValue(EditorController.getCONFIG().getCodeFont().getFamily());
 
+
+
         fontSizeSlider.valueProperty().addListener((observable, oldValue, newValue) -> fontSize.setText(String.valueOf(newValue.intValue())));
+
+
 
     }
 

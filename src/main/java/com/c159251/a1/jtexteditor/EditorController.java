@@ -150,6 +150,7 @@ public class EditorController {
             setWordCountLabel();
         });
         textPane.setParagraphGraphicFactory(LineNumberFactory.get(textPane));
+        textPane.getStylesheets().add(EditorLauncher.class.getResource("base.css").toExternalForm());
         textPane.getStylesheets().add(EditorLauncher.class.getResource("java-code.css").toExternalForm());
     }
 
@@ -159,7 +160,7 @@ public class EditorController {
         return clipboardText;
     }
 
-    public TextArea getTextPane() {
+    public CodeArea getTextPane() {
         return textPane;
     }
 
@@ -346,7 +347,7 @@ public class EditorController {
             }
             // if successfully loaded, populate textPane with file text
             if (!fileToText.isEmpty()) {
-                textPane.setText(fileToText.toString());
+                textPane.replaceText(fileToText.toString());
             }
 
         }
@@ -482,7 +483,7 @@ public class EditorController {
             int caretPos = textPane.getCaretPosition(); // storing the caret position
             textPane.insertText(caretPos, systemClipboard.getString());
             onSearchTextChanged(); // this function messes with the caret position
-            textPane.positionCaret(caretPos + systemClipboard.getString().length()); // resetting the caret position
+          //  textPane.positionCaret(caretPos + systemClipboard.getString().length()); // resetting the caret position
         }
     }
 
@@ -740,7 +741,7 @@ public class EditorController {
 
     private void setConfigs() {
 
-        textPane.setFont(CONFIG.getTextFont());
+        //textPane.setFont(CONFIG.getTextFont());
     }
 
     public void editSettings(ActionEvent actionEvent) {

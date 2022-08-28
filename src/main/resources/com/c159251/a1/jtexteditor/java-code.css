@@ -1,49 +1,38 @@
 .keyword {
-    -fx-fill: rgb(0, 119, 170);
+    -fx-fill: -highlight1;
 }
 
 .annotation {
-    -fx-fill: rgb(255,140,0);
+    -fx-fill: -highlight2;
 }
 
 .function {
-    -fx-fill: purple !important;
+    -fx-fill: -highlight3 !important;
 }
 
 .capword {
-    -fx-fill: rgb(221, 74, 104);
+    -fx-fill: -highlight4;
 }
 
 .number, .library {
-    -fx-fill: rgb(255,140,0);
+    -fx-fill: -highlight5;
 }
 
 .paren {
-    -fx-fill: firebrick;
+    -fx-fill: -highlight6;
 }
 .bracket {
-    -fx-fill: darkgreen;
+    -fx-fill: -highlight7;
 }
 .brace {
-    -fx-fill: teal;
+    -fx-fill: -highlight8;
 }
 .string {
-    -fx-fill: rgb(102, 153, 0);
+    -fx-fill: -highlight9;
 }
 
 .comment {
-	-fx-fill: rgb(112, 128, 144);
+	-fx-fill: -highlight10;
     -fx-font-style: italic;
 }
 
-
-.paragraph-box {
-    -fx-font-weight: bold;
-    -fx-background-color: #f2f9fc;
-}
-
-.paragraph-text {
-    -fx-font-family: consolas;
-    -fx-font-size: 11pt;
-    -fx-tab-size: 4;
-}

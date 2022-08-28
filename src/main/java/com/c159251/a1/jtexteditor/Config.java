@@ -3,9 +3,8 @@ package com.c159251.a1.jtexteditor;
 
 
 import java.io.*;
-import java.net.URISyntaxException;
-import java.util.HashMap;
-import java.util.Map;
+import java.lang.reflect.Array;
+import java.util.*;
 
 import javafx.scene.text.Font;
 import org.snakeyaml.engine.v2.api.*;
@@ -18,6 +17,12 @@ public class Config {
     private int fontSize;
     private String textFont;
     private String codeFont;
+    private ArrayList<String> themes;
+
+    public ArrayList<String> getThemes() {
+        return themes;
+    }
+
 
 
     public Config() {
@@ -29,20 +34,28 @@ public class Config {
             this.fontSize = (int) configMap.get("fontSize");
             this.textFont = (String) configMap.get("textFont");
             this.codeFont = (String) configMap.get("codeFont");
+
+            this.themes = (ArrayList<String>) configMap.get("themes");
+
+
         } else {
             this.username = System.getenv("username");
             this.fontSize = 12;
             this.textFont = "Arial";
             this.codeFont = "Consolas";
+
         }
 
 
     }
 
+
+
     @Override
     public String toString() {
         return username + " uses " + fontSize + "pt " + textFont + " for text and " + codeFont + " for code";
     }
+
 
     private Map<String, Object> loadConfigYaml() {
 
@@ -108,13 +121,14 @@ public class Config {
 
     private void saveConfigYaml() {
 
-        DumpSettings settings = DumpSettings.builder().setDefaultScalarStyle(ScalarStyle.DOUBLE_QUOTED).build();
+        DumpSettings settings = DumpSettings.builder().setDefaultScalarStyle(ScalarStyle.PLAIN).build();
         Dump dump = new Dump(settings);
         HashMap<String, Object> output = new HashMap<>();
         output.put("username", this.username);
         output.put("fontSize", this.fontSize);
         output.put("textFont", this.textFont);
         output.put("codeFont", this.codeFont);
+        output.put("themes", this.themes);
 
         String outString = "#configuration\n" + dump.dumpToString(output);
 

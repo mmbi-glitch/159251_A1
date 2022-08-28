@@ -156,7 +156,7 @@ class EditorLauncherTest {
         WaitForAsyncUtils.waitForFxEvents();
         editorController.getTextPane().selectRange(11, 17);
         robot.clickOn("#cutBtn");
-        Assertions.assertThat(editorController.getTextPane().getText()).isEqualTo("Testing in  is testing me.\n");
+        Assertions.assertThat(editorController.getTextPane().getText()).isEqualTo("Testing in  is testing me.");
         Assertions.assertThat(editorController.getClipboardText()).isEqualTo("JavaFX");
     }
 
@@ -173,7 +173,7 @@ class EditorLauncherTest {
         robot.clickOn("#textPane");
         editorController.getTextPane().displaceCaret(17);
         robot.clickOn("#pasteBtn");
-        Assertions.assertThat(editorController.getTextPane().getText()).isEqualTo("Testing in JavaFXJavaFX is testing me.\n");
+        Assertions.assertThat(editorController.getTextPane().getText()).isEqualTo("Testing in JavaFXJavaFX is testing me.");
     }
 
     // ------------ searching text tests ---------------- //

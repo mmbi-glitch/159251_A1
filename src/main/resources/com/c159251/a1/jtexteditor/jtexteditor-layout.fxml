@@ -6,6 +6,7 @@
 <?import org.fxmisc.richtext.*?>
 <?import org.kordamp.ikonli.javafx.*?>
 
+<?import org.fxmisc.flowless.VirtualizedScrollPane?>
 <BorderPane prefHeight="480.0" prefWidth="720.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.c159251.a1.jtexteditor.EditorController">
     <top>
         <VBox>
@@ -105,11 +106,11 @@
         </VBox>
     </top>
     <center>
-        <ScrollPane fitToHeight="true" fitToWidth="true" BorderPane.alignment="CENTER">
+        <VirtualizedScrollPane BorderPane.alignment="CENTER">
             <content>
                 <CodeArea fx:id="textPane" prefHeight="200.0" prefWidth="200.0" wrapText="true" />
             </content>
-        </ScrollPane>
+        </VirtualizedScrollPane>
     </center>
    <bottom>
       <HBox alignment="CENTER_LEFT" prefHeight="21.0" prefWidth="352.0" spacing="30.0">

@@ -47,7 +47,6 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.io.*;
 import java.util.Objects;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -70,7 +69,7 @@ public class EditorController {
     private Button searchForNextBtn;
 
     private File selectedFile;
-    private File selectedFileExtension;
+    private String selectedFileExtension;
     private Clipboard systemClipboard;
     private String clipboardText;
     private int elapsedSeconds;
@@ -144,7 +143,17 @@ public class EditorController {
 
         //set up listener for text pane changes
         textPane.textProperty().addListener((observable, oldValue, newValue) -> {
-            applyHighlighting();
+            if (selectedFileExtension.equals(".cpp")) {
+                textPane.getStylesheets().remove(EditorLauncher.class.getResource("java-code.css").toExternalForm());
+                textPane.getStylesheets().add(EditorLauncher.class.getResource("cpp-code.css").toExternalForm());
+            }
+            if (selectedFileExtension.equals(".java")) {
+                textPane.getStylesheets().remove(EditorLauncher.class.getResource("cpp-code.css").toExternalForm());
+                textPane.getStylesheets().add(EditorLauncher.class.getResource("java-code.css").toExternalForm());
+            }
+            if (selectedFileExtension.equals(".java") || selectedFileExtension.equals(".cpp")) {
+                applyHighlighting();
+            }
             setChangedStatus();
             setWordCountLabel();
         });
@@ -220,12 +229,14 @@ public class EditorController {
                     onFileSave();
                     textPane.clear();
                     setSelectedFile(null);
+                    selectedFileExtension = null;
                     setTitle("NEW FILE");
                     setNewStatus();
                 }
                 if (!Objects.equals(response, ButtonType.CANCEL)) {
                     textPane.clear();
                     setSelectedFile(null);
+                    selectedFileExtension = null;
                     setTitle("NEW FILE");
                     setNewStatus();
                 }
@@ -277,19 +288,21 @@ public class EditorController {
         fileChooser.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter("Plain Text (*.txt)", "*.txt"),
                 new FileChooser.ExtensionFilter("OpenDocument Text (*.odt)", "*.odt"),
-                new FileChooser.ExtensionFilter("PDF (*.pdf)", "*.pdf")
+                new FileChooser.ExtensionFilter("PDF (*.pdf)", "*.pdf"),
+                new FileChooser.ExtensionFilter("Java File (*.java)", "*.java"),
+                new FileChooser.ExtensionFilter("C++ File (*.cpp)", "*.cpp")
         );
         fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
         selectedFile = fileChooser.showOpenDialog(null);
         if (selectedFile != null) {
             setTitle(selectedFile.getName());
-
-            if (selectedFile.getName().contains(".odt")) {
+            selectedFileExtension = selectedFile.getName().substring(selectedFile.getName().lastIndexOf("."));
+            if (selectedFileExtension.equals(".odt")) {
                 loadTextFromOdtFile(selectedFile);
                 setOpenStatus();
                 return;
             }
-            if (selectedFile.getName().contains(".pdf")) {
+            if (selectedFileExtension.equals(".pdf")) {
                 loadTextFromPdfFile(selectedFile);
                 setOpenStatus();
                 return;
@@ -428,7 +441,7 @@ public class EditorController {
                             matcher.group("CAPWORD") != null ? "capword" :
                                 matcher.group("LIBRARY") != null ? "library" :
                                     matcher.group("ANNOTATION") != null ? "annotation" :
-//                                        matcher.group("NUMBER") != null ? "number" :
+                                        matcher.group("NUMBER") != null ? "number" :
                                             matcher.group("PAREN") != null ? "paren" :
                                                 matcher.group("BRACE") != null ? "brace" :
                                                     matcher.group("BRACKET") != null ? "bracket" :
@@ -482,7 +495,7 @@ public class EditorController {
             int caretPos = textPane.getCaretPosition(); // storing the caret position
             textPane.insertText(caretPos, systemClipboard.getString());
             onSearchTextChanged(); // this function messes with the caret position
-          //  textPane.positionCaret(caretPos + systemClipboard.getString().length()); // resetting the caret position
+            textPane.displaceCaret(caretPos + systemClipboard.getString().length()); // resetting the caret position
         }
     }
 

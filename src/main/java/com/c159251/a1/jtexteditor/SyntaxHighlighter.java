@@ -33,7 +33,7 @@ public final class SyntaxHighlighter {
 
     private static final String CPP_KEYWORD_PATTERN = "\\b(" + String.join("|", CPP_KEYWORDS) + ")\\b";
     private static final String CPP_LIB_PATTERN = "\\<(.*?)\\>";
-//    private static final String NUMBER_PATTERN = "[0-9]+";
+    private static final String NUMBER_PATTERN = "[0-9]+";
     private static final String JAVA_KEYWORD_PATTERN = "\\b(" + String.join("|", JAVA_KEYWORDS) + ")\\b";
     private static final String JAVA_LIB_PATTERN = "(\\w+)(?=[.])";
     private static final String PAREN_PATTERN = "\\(|\\)";
@@ -51,6 +51,7 @@ public final class SyntaxHighlighter {
                     + "|(?<PAREN>" + PAREN_PATTERN + ")"
                     + "|(?<FUNCTION>" + FUNCTION_PATTERN + ")"
                     + "|(?<CAPWORD>" + CAP_WORD_PATTERN + ")"
+                    + "|(?<NUMBER>" + NUMBER_PATTERN + ")"
                     + "|(?<ANNOTATION>" + ANNOTATION_PATTERN + ")"
                     + "|(?<BRACE>" + BRACE_PATTERN + ")"
                     + "|(?<BRACKET>" + BRACKET_PATTERN + ")"
@@ -63,6 +64,7 @@ public final class SyntaxHighlighter {
             "(?<KEYWORD>" + JAVA_KEYWORD_PATTERN + ")"
                     + "|(?<PAREN>" + PAREN_PATTERN + ")"
                     + "|(?<FUNCTION>" + FUNCTION_PATTERN + ")"
+                    + "|(?<NUMBER>" + NUMBER_PATTERN + ")"
                     + "|(?<LIBRARY>" + JAVA_LIB_PATTERN + ")"
                     + "|(?<CAPWORD>" + CAP_WORD_PATTERN + ")"
                     + "|(?<ANNOTATION>" + ANNOTATION_PATTERN + ")"

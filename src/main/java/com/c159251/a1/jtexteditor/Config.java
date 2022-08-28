@@ -61,7 +61,7 @@ public class Config {
         LoadSettings settings = LoadSettings.builder().build();
         Load load = new Load(settings);
 
-        try (InputStream stream = new FileInputStream("src/main/Config/config.yaml")) {
+        try (InputStream stream = EditorLauncher.class.getResourceAsStream("config.yaml")) {
 
             return (Map<String, Object>) load.loadFromInputStream(stream);
 

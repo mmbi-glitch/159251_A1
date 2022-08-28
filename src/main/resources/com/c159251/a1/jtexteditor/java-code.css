@@ -1,0 +1,38 @@
+.keyword {
+    -fx-fill: -highlight1;
+}
+
+.annotation {
+    -fx-fill: -highlight2;
+}
+
+.function {
+    -fx-fill: -highlight3 !important;
+}
+
+.capword {
+    -fx-fill: -highlight4;
+}
+
+.number, .library {
+    -fx-fill: -highlight5;
+}
+
+.paren {
+    -fx-fill: -highlight6;
+}
+.bracket {
+    -fx-fill: -highlight7;
+}
+.brace {
+    -fx-fill: -highlight8;
+}
+.string {
+    -fx-fill: -highlight9;
+}
+
+.comment {
+	-fx-fill: -highlight10;
+    -fx-font-style: italic;
+}
+

@@ -1,0 +1,29 @@
+.keyword {
+    -fx-fill: -highlight11;
+}
+
+.number {
+    -fx-fill: -highlight12;
+}
+
+.function {
+    -fx-fill:  -highlight13;
+}
+
+.bracket {
+    -fx-fill: -highlight7;
+}
+
+.brace {
+    -fx-fill: -highlight8;
+}
+
+.string, .library {
+    -fx-fill: -highlight6;
+}
+
+.comment {
+    -fx-fill: -highlight12;
+    -fx-font-style: italic;
+}
+

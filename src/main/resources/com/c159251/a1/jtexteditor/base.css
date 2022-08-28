@@ -1,0 +1,29 @@
+* {
+
+    -background-color: ghostwhite;
+    -foreground-color: black;
+
+    -highlight1: rgb(0, 119, 170);
+    -highlight2: rgb(255,140,0);
+    -highlight3: purple;
+    -highlight4: rgb(221, 74, 104);
+    -highlight5: rgb(255,140,0);
+    -highlight6: firebrick;
+    -highlight7: darkgreen;
+    -highlight8: teal;
+    -highlight9: rgb(102, 153, 0);
+    -highlight10: rgb(112, 128, 144);
+    -highlight11: rgb(109,113,46);
+    -highlight12: green;
+    -highlight13: rgb(0,80,181);
+
+}
+
+.paragraph-box {
+    -fx-font-weight: bold;
+    -fx-background-color: -background-color;
+}
+
+.paragraph-text {
+    -fx-tab-size: 4;
+}

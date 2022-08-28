@@ -1,0 +1,9 @@
+#configuration
+"codeFont": >-
+  Consolas
+"fontSize": !!int >-
+  12
+"textFont": >-
+  Arial Narrow
+"username": >-
+  Robert Simpson

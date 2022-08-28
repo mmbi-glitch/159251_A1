@@ -15,6 +15,11 @@ module com.c159251.a1.jtexteditor {
     requires barcodes;
     requires styled.xml.parser;
     requires layout;
+    requires org.apache.commons.lang3;
+    requires javafx.web;
+    requires org.snakeyaml.engine.v2;
+
+    requires org.fxmisc.richtext;
 
     opens com.c159251.a1.jtexteditor to javafx.fxml;
     exports com.c159251.a1.jtexteditor;

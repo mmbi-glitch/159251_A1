@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane prefHeight="157.0" prefWidth="543.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.c159251.a1.jtexteditor.ConfigwindowController">
+   <bottom>
+      <ButtonBar BorderPane.alignment="CENTER">
+         <BorderPane.margin>
+            <Insets bottom="10.0" left="10.0" right="10.0" />
+         </BorderPane.margin>
+         <buttons>
+            <Button fx:id="configSaveBtn" mnemonicParsing="false" onAction="#setConfig" text="Ok" />
+            <Button fx:id="configCancelBtn" mnemonicParsing="false" onAction="#cancelConfig" text="Cancel" />
+         </buttons>
+         <padding>
+            <Insets left="5.0" right="5.0" />
+         </padding>
+      </ButtonBar>
+   </bottom>
+   <padding>
+      <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+   </padding>
+   <center>
+       <AnchorPane prefHeight="160.0" prefWidth="500.0" BorderPane.alignment="CENTER">
+           <padding>
+               <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+           </padding>
+           <Label layoutX="27.0" layoutY="29.0" text="User Name" />
+           <TextField fx:id="userName" layoutX="102.0" layoutY="25.0" prefHeight="25.0" prefWidth="347.0" />
+           <Label layoutX="27.0" layoutY="66.0" text="Font Size" />
+           <TextField fx:id="fontSize" editable="false" layoutX="102.0" layoutY="62.0" prefHeight="25.0" prefWidth="31.0" />
+           <Slider fx:id="fontSizeSlider" blockIncrement="1.0" layoutX="141.0" layoutY="68.0" max="50.0" min="5.0" prefHeight="14.0" prefWidth="351.0" value="12.0" />
+       </AnchorPane>
+   </center>
+</BorderPane>

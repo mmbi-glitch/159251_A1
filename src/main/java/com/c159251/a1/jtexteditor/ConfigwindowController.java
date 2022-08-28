@@ -34,31 +34,21 @@ public class ConfigwindowController {
         userName.setText(EditorController.getCONFIG().getUsername());
         fontSize.setText(String.valueOf(EditorController.getCONFIG().getFontSize()));
         fontSizeSlider.adjustValue(EditorController.getCONFIG().getFontSize());
-
-        textFontCombo.setItems(FXCollections.observableList(Font.getFamilies()));
-        textFontCombo.setValue(EditorController.getCONFIG().getTextFont().getFamily());
-        codeFontCombo.setItems(FXCollections.observableList(Font.getFamilies()));
-        codeFontCombo.setValue(EditorController.getCONFIG().getCodeFont().getFamily());
-
-
-
         fontSizeSlider.valueProperty().addListener((observable, oldValue, newValue) -> fontSize.setText(String.valueOf(newValue.intValue())));
-
-
 
     }
 
     public void setConfig(ActionEvent actionEvent) {
 
-        EditorController.getCONFIG().updateConfig(userName.getText(),Integer.parseInt(fontSize.getText()),textFontCombo.getValue(),codeFontCombo.getValue());
-        Stage stage = (Stage) textFontCombo.getScene().getWindow();
+        Stage stage = (Stage) fontSizeSlider.getScene().getWindow();
+        EditorController.getCONFIG().updateConfig(userName.getText(),Integer.parseInt(fontSize.getText()));
         stage.close();
 
     }
 
     public void cancelConfig(ActionEvent actionEvent) {
 
-        Stage stage = (Stage) textFontCombo.getScene().getWindow();
+        Stage stage = (Stage) fontSizeSlider.getScene().getWindow();
         stage.close();
 
     }

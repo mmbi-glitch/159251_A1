@@ -130,8 +130,6 @@ public class EditorController {
     protected void initialize() {
         systemClipboard = Clipboard.getSystemClipboard();
         // config applies details
-        System.out.println(CONFIG.toString());
-        this.setConfigs();
 
         searchBar.setManaged(false);
         searchBar.setVisible(false);
@@ -142,6 +140,7 @@ public class EditorController {
         secondsTimer.setCycleCount(Animation.INDEFINITE);
         secondsTimer.play();
         setNewStatus();
+        this.setConfigs();
 
         //set up listener for text pane changes
         textPane.textProperty().addListener((observable, oldValue, newValue) -> {
@@ -741,7 +740,8 @@ public class EditorController {
 
     private void setConfigs() {
 
-        //textPane.setFont(CONFIG.getTextFont());
+        textPane.setStyle("-fx-font-size: " + CONFIG.getFontSize() + "pt;");
+
     }
 
     public void editSettings(ActionEvent actionEvent) {
@@ -750,7 +750,7 @@ public class EditorController {
             Parent root = loader.load();
             Stage stageAbout = new Stage();
             stageAbout.setTitle("Configuration");
-            stageAbout.setScene(new Scene(root,486,212));
+            stageAbout.setScene(new Scene(root,540,160));
             stageAbout.showAndWait();
             setConfigs();
 

@@ -3,11 +3,11 @@
 }
 
 .number {
-    -fx-fill: -highlight3;
+    -fx-fill: -highlight12;
 }
 
 .function {
-    -fx-fill:  -highlight4;
+    -fx-fill:  -highlight13;
 }
 
 .bracket {
@@ -23,6 +23,7 @@
 }
 
 .comment {
-    -fx-fill: -highlight5;
+    -fx-fill: -highlight12;
+    -fx-font-style: italic;
 }
 

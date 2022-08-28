@@ -142,24 +142,27 @@ public class EditorController {
         this.setConfigs();
 
         //set up listener for text pane changes
+        selectedFileExtension = "";
         textPane.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (selectedFileExtension.equals("")) {
+                textPane.getStylesheets().remove(EditorLauncher.class.getResource("cpp-code.css").toExternalForm());
+                textPane.getStylesheets().remove(EditorLauncher.class.getResource("java-code.css").toExternalForm());
+            }
             if (selectedFileExtension.equals(".cpp")) {
                 textPane.getStylesheets().remove(EditorLauncher.class.getResource("java-code.css").toExternalForm());
                 textPane.getStylesheets().add(EditorLauncher.class.getResource("cpp-code.css").toExternalForm());
+                applyHighlighting(SyntaxHighlighter.CPP_PATTERN);
             }
             if (selectedFileExtension.equals(".java")) {
                 textPane.getStylesheets().remove(EditorLauncher.class.getResource("cpp-code.css").toExternalForm());
                 textPane.getStylesheets().add(EditorLauncher.class.getResource("java-code.css").toExternalForm());
-            }
-            if (selectedFileExtension.equals(".java") || selectedFileExtension.equals(".cpp")) {
-                applyHighlighting();
+                applyHighlighting(SyntaxHighlighter.JAVA_PATTERN);
             }
             setChangedStatus();
             setWordCountLabel();
         });
         textPane.setParagraphGraphicFactory(LineNumberFactory.get(textPane));
         textPane.getStylesheets().add(EditorLauncher.class.getResource("base.css").toExternalForm());
-        textPane.getStylesheets().add(EditorLauncher.class.getResource("java-code.css").toExternalForm());
     }
 
     // ---------------------------- getters ----------------------------------- //
@@ -229,14 +232,14 @@ public class EditorController {
                     onFileSave();
                     textPane.clear();
                     setSelectedFile(null);
-                    selectedFileExtension = null;
+                    selectedFileExtension = "";
                     setTitle("NEW FILE");
                     setNewStatus();
                 }
                 if (!Objects.equals(response, ButtonType.CANCEL)) {
                     textPane.clear();
                     setSelectedFile(null);
-                    selectedFileExtension = null;
+                    selectedFileExtension = "";
                     setTitle("NEW FILE");
                     setNewStatus();
                 }
@@ -423,9 +426,9 @@ public class EditorController {
 
     // -------------------------- Syntax Highlighting Updater ---------------- //
 
-    protected void applyHighlighting() {
+    protected void applyHighlighting(Pattern pattern) {
         String text = textPane.getText();
-        StyleSpans<Collection<String>> styledText = computeHighlighting(text, SyntaxHighlighter.JAVA_PATTERN);
+        StyleSpans<Collection<String>> styledText = computeHighlighting(text, pattern);
         textPane.setStyleSpans(0, styledText);
     }
 

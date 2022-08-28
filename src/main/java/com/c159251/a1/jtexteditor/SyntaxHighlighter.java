@@ -12,7 +12,7 @@ public final class SyntaxHighlighter {
             "template", "this", "throw", "true", "try", "typeid", "typename",
             "using", "virtual", "wchar_t", "cin", "cout", "endl", "include",
             "NULL", "string", "auto", "break", "case", "char",
-            "continue", "default", "do", "double", "else", "else if", "entry",
+            "continue", "default", "define", "do", "double", "else", "else if", "entry",
             "extern", "float", "for", "goto", "if", "int", "long", "register",
             "return", "short", "sizeof", "static", "struct", "switch",
             "typedef", "union", "unsigned", "void", "while",
@@ -46,11 +46,12 @@ public final class SyntaxHighlighter {
     private static final String STRING_PATTERN = "\"([^\"\\\\]|\\\\.)*\"";
     private static final String COMMENT_PATTERN = "//[^\n]*" + "|" + "/\\*(.|\\R)*?\\*/";
 
-    public static final Pattern CPP_PATTERN = Pattern.compile(
+    public static final Pattern CPP_PATTERN = Pattern.compile (
             "(?<KEYWORD>" + CPP_KEYWORD_PATTERN + ")"
                     + "|(?<PAREN>" + PAREN_PATTERN + ")"
                     + "|(?<FUNCTION>" + FUNCTION_PATTERN + ")"
                     + "|(?<CAPWORD>" + CAP_WORD_PATTERN + ")"
+                    + "|(?<LIBRARY>" + CPP_LIB_PATTERN + ")"
                     + "|(?<NUMBER>" + NUMBER_PATTERN + ")"
                     + "|(?<ANNOTATION>" + ANNOTATION_PATTERN + ")"
                     + "|(?<BRACE>" + BRACE_PATTERN + ")"
@@ -74,4 +75,6 @@ public final class SyntaxHighlighter {
                     + "|(?<STRING>" + STRING_PATTERN + ")"
                     + "|(?<COMMENT>" + COMMENT_PATTERN + ")"
     );
+
+
 }

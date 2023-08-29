@@ -1,12 +1,29 @@
-# JTextEditor - A Syntax Highlighting Code and Text Editor
-## Assignment 1 159.251 Semester 2 2022
-### _Saad Billah (21011762) R Simpson (20021344)_
+# Assignment 1 - 159251 (JTextEditor) 
+
+Lightweight code and text editor, complete with syntax highlighting (limited functionality), file conversions, cut/copy/paste functionality, and more. Created using:
+- Java as the programming language.
+- Java FX for creating the GUI application.
+- JetBrains IntelliJ IDEA as the IDE.
+
+---
+
+## Massey University Disclaimer
+
+This is a submission for a group assignment for the Massey University course 159.251 - Software Eng Design and Construction. Under no circumstances is it to be copied and submitted anywhere as plagiarised work.
+
+Group members:
+- Saad Billah (21011762)
+- Rob Simpson (20021344)
+
+---
 
 ## Installation Instructions:
 1. Create a new directory and use `git clone` to clone https://github.com/mmbi-glitch/251-Assignment1-2022-Rob-Saad
 2. From this directory use `mvn compile` to compile the editor in this folder
 3. If you package/test/verify locally do not move the mouse during the FXRobot Testing, enjoy the show!
 4. Double click on JTextEditor.JAR to run the application
+
+---
 
 ## Features:
 - Open .txt, .odt and extract text from PDF documents
@@ -15,6 +32,8 @@
 - Print to system printer
 - Syntax Highlighting for Java and CPP
 - YaML Configuration file holds custom username, and saves font size preferences
+
+---
 
 ## Commit IDs:
 #### Saad: 

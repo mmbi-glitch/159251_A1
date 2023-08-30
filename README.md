@@ -37,9 +37,14 @@ This is a submission for a group assignment for the Massey University course 159
 
 ### Screenshots
 
-- ![Text editor](text-editor-gui.png)
-- ![Syntax highlighting](text-editor-syntax-highlighting.png)
-- ![PDF conversion](text-editor-pdf-save.png) 
+The text editor in action:
+![Text editor](text-editor-gui.png)
+<br>
+Syntax highlighting for java files:
+![Syntax highlighting](text-editor-syntax-highlighting.png)
+<br>
+Opening PDF files (does file conversion):
+![PDF conversion](text-editor-pdf-open.png) 
 
 ---
 

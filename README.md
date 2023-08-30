@@ -11,13 +11,13 @@ Note: This was a group assignment with the following members:
 
 ---
 
-## Massey University Disclaimer
+### Massey University Disclaimer
 
 This is a submission for a group assignment for the Massey University course 159.251 - Software Eng Design and Construction. Under no circumstances is it to be copied and submitted anywhere as plagiarised work.
 
 ---
 
-## Installation Instructions:
+### Installation Instructions:
 1. Create a new directory and use `git clone` to clone https://github.com/mmbi-glitch/251-Assignment1-2022-Rob-Saad
 2. From this directory use `mvn compile` to compile the editor in this folder
 3. If you package/test/verify locally do not move the mouse during the FXRobot Testing, enjoy the show!
@@ -25,7 +25,7 @@ This is a submission for a group assignment for the Massey University course 159
 
 ---
 
-## Features:
+### Features:
 - Open .txt, .odt and extract text from PDF documents
 - Save as .txt, .odt and PDF (including conversion from one to the other)
 - Select Cut Copy Paste and Add Timestamps
@@ -35,7 +35,15 @@ This is a submission for a group assignment for the Massey University course 159
 
 ---
 
-## Commit IDs:
+### Screenshots
+
+- ![Text editor](text-editor-gui.png)
+- ![Syntax highlighting](text-editor-syntax-highlighting.png)
+- ![PDF conversion](text-editor-pdf-save.png) 
+
+---
+
+### Commit IDs:
 #### Saad: 
 - 45b873d064aa81fbd9c06f63f973bbe9867b1118 (PDF_conversion)
 - 45b873d064aa81fbd9c06f63f973bbe9867b1118 (Printing)

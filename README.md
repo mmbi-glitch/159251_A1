@@ -5,15 +5,15 @@ Lightweight code and text editor, complete with syntax highlighting (limited fun
 - Java FX for creating the GUI application.
 - JetBrains IntelliJ IDEA as the IDE.
 
+Note: This was a group assignment with the following members:
+- Saad Billah (21011762)
+- Rob Simpson (20021344)
+
 ---
 
 ## Massey University Disclaimer
 
 This is a submission for a group assignment for the Massey University course 159.251 - Software Eng Design and Construction. Under no circumstances is it to be copied and submitted anywhere as plagiarised work.
-
-Group members:
-- Saad Billah (21011762)
-- Rob Simpson (20021344)
 
 ---
 

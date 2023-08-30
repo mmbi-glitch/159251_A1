@@ -2,6 +2,8 @@
 
 Lightweight code and text editor, complete with syntax highlighting (limited functionality), file conversions, cut/copy/paste functionality, and more. Created using:
 - Java as the programming language.
+- JUnit/TestFx for unit testing.
+- Github Actions for CI/CD.
 - Java FX for creating the GUI application.
 - JetBrains IntelliJ IDEA as the IDE.
 
